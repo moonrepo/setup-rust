@@ -1,7 +1,7 @@
 {
   "name": "@moonrepo/setup-rust",
   "version": "0.1.0",
-  "description": "A GitHub action that for setting up Rust and Cargo.",
+  "description": "A GitHub action for setting up Rust and Cargo.",
   "main": "dist/index.js",
   "scripts": {
     "build": "ncc build ./index.ts",
@@ -17,7 +17,8 @@
   "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.10.0",
-    "@actions/github": "^5.1.1"
+    "@actions/exec": "^1.1.1",
+    "@ltd/j-toml": "^1.38.0"
   },
   "devDependencies": {
     "@types/node": "^18.15.10",

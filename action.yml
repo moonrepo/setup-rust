@@ -1,11 +1,19 @@
 name: 'Setup Rust'
 author: 'Miles Johnson'
 description: 'Sets up Rust and Cargo.'
-inputs: {}
+inputs:
+  channel:
+    description: 'Toolchain specification/channel to install.'
+  components:
+    description: 'Comma-separated list of additional components to install.'
+  targets:
+    description: 'Comma-separated list of additional targets to install.'
+  profile:
+    description: 'Profile to install. Defaults to "minimal".'
 outputs: {}
 runs:
   using: 'node16'
   main: 'dist/index.js'
 branding:
-  icon: 'moon'
-  color: 'purple'
+  icon: 'settings'
+  color: 'orange'
