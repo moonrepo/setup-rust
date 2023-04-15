@@ -1,0 +1,11 @@
+name: 'Setup Rust'
+author: 'Miles Johnson'
+description: 'Sets up Rust and Cargo.'
+inputs: {}
+outputs: {}
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
+branding:
+  icon: 'moon'
+  color: 'purple'
