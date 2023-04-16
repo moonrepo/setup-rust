@@ -3,6 +3,7 @@ import os from 'os';
 import path from 'path';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
+import * as tc from '@actions/tool-cache';
 import TOML from '@ltd/j-toml';
 
 interface Toolchain {
@@ -66,7 +67,7 @@ function detectToolchain(): Toolchain {
 			channel: process.env.RUSTUP_TOOLCHAIN,
 		});
 	} else {
-		core.info('Searching for rust-toolchain.toml or rust-toolchain file');
+		core.info('Loading rust-toolchain.toml or rust-toolchain file');
 
 		for (const configName of ['rust-toolchain.toml', 'rust-toolchain']) {
 			const configPath = path.join(process.cwd(), configName);
@@ -128,6 +129,47 @@ async function installToolchain(toolchain: Toolchain) {
 	await exec.exec('rustc', [`+${toolchain.channel}`, '--version', '--verbose']);
 }
 
+async function downloadAndInstallBinstall(binDir: string) {
+	core.info('cargo-binstall does not exist, attempting to install');
+
+	let arch;
+	let file;
+
+	switch (process.arch) {
+		case 'x64':
+			arch = 'x86_64';
+			break;
+		case 'arm64':
+			arch = 'aarch64';
+			break;
+		default:
+			throw new Error(`Unsupported architecture: ${process.arch}`);
+	}
+
+	switch (process.platform) {
+		case 'linux':
+			file = `${arch}-unknown-linux-gnu.tgz`;
+			break;
+		case 'darwin':
+			file = `${arch}-apple-darwin.zip`;
+			break;
+		case 'win32':
+			file = `${arch}-pc-windows-msvc.zip`;
+			break;
+		default:
+			throw new Error(`Unsupported platform: ${process.platform}`);
+	}
+
+	const url = `https://github.com/cargo-bins/cargo-binstall/releases/latest/download/cargo-binstall-${file}`;
+	const dlPath = await tc.downloadTool(url);
+
+	if (url.endsWith('.zip')) {
+		await tc.extractZip(dlPath, binDir);
+	} else if (url.endsWith('.tgz')) {
+		await tc.extractTar(dlPath, binDir);
+	}
+}
+
 async function installBins() {
 	const bins = core
 		.getInput('bins')
@@ -144,12 +186,8 @@ async function installBins() {
 
 	const binDir = path.join(getCargoHome(), 'bin');
 
-	core.debug('Checking if cargo-binstall has been installed');
-
 	if (!fs.existsSync(path.join(binDir, 'cargo-binstall'))) {
-		core.debug('Not installed, attempting to install');
-
-		await exec.exec('cargo', ['install', 'cargo-binstall']);
+		await downloadAndInstallBinstall(binDir);
 	}
 
 	await exec.exec('cargo', ['binstall', '--no-confirm', '--log-level', 'info', ...bins]);
