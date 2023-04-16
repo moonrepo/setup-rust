@@ -1,6 +1,8 @@
 name: 'Setup Rust and Cargo'
 author: 'Miles Johnson'
-description: 'Sets up Rust and Cargo.'
+description:
+  'Sets up Rust by installing a toolchain, components, and targets with rustup. Also sets up Cargo
+  by installing necessary binaries and caching when applicable.'
 inputs:
   bins:
     description: 'Comma-separated list of global binaries to install.'
