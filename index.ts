@@ -152,7 +152,7 @@ async function installBins() {
 		await exec.exec('cargo', ['install', 'cargo-binstall']);
 	}
 
-	await exec.exec('cargo', ['binstall', ' --no-confirm', '--log-level', 'info', ...bins]);
+	await exec.exec('cargo', ['binstall', '--no-confirm', '--log-level', 'info', ...bins]);
 }
 
 async function run() {
