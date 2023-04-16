@@ -13,6 +13,6 @@ jobs:
       - run: npm install -g pnpm
       - run: pnpm install
       - run: pnpm run build
-      - uses: JasonEtco/build-and-tag-action@v1
+      - uses: JasonEtco/build-and-tag-action@v2
         env:
           GITHUB_TOKEN: ${{ github.token }}
