@@ -1,7 +1,9 @@
-name: 'Setup rustup toolchain'
+name: 'Setup Rust and Cargo'
 author: 'Miles Johnson'
 description: 'Sets up Rust and Cargo.'
 inputs:
+  bins:
+    description: 'Comma-separated list of global binaries to install.'
   channel:
     description: 'Toolchain specification/channel to install.'
   components:

@@ -23,6 +23,14 @@ const DEFAULT_TOOLCHAIN: Toolchain = {
 	targets: [],
 };
 
+function getCargoHome(): string {
+	if (process.env.CARGO_HOME) {
+		return process.env.CARGO_HOME;
+	}
+
+	return path.join(os.homedir(), '.cargo');
+}
+
 function parseConfig(configPath: string): Partial<Toolchain> {
 	const contents = fs.readFileSync(configPath, 'utf8').trim();
 
@@ -120,15 +128,46 @@ async function installToolchain(toolchain: Toolchain) {
 	await exec.exec('rustc', [`+${toolchain.channel}`, '--version', '--verbose']);
 }
 
-async function run() {
-	try {
-		await installToolchain(detectToolchain());
-	} catch (error: unknown) {
-		core.setFailed((error as Error).message);
+async function installBins() {
+	const bins = core
+		.getInput('bins')
+		.split(',')
+		.map((bin) => bin.trim())
+		.filter(Boolean);
 
-		throw error;
+	if (bins.length === 0) {
+		return;
 	}
 
+	core.info('Installing additional binaries');
+
+	const binDir = path.join(getCargoHome(), 'bin');
+
+	core.debug('Checking if cargo-binstall has been installed');
+
+	if (!fs.existsSync(path.join(binDir, 'cargo-binstall'))) {
+		core.debug('Not installed, attempting to install');
+
+		await exec.exec('cargo', ['install', 'cargo-binstall']);
+	}
+
+	await Promise.all(
+		bins.map((bin) => {
+			const [crate, version] = bin.split('@');
+			const args = ['binstall', crate.startsWith('cargo-') ? crate : `cargo-${crate}`];
+
+			if (version) {
+				args.push('--version', version);
+			}
+
+			core.info(`Installing ${crate}...`);
+
+			return exec.exec('cargo', args);
+		}),
+	);
+}
+
+async function run() {
 	core.info('Setting cargo environment variables');
 
 	// Disable incremental compilation
@@ -137,9 +176,18 @@ async function run() {
 	// Always enable colored output
 	core.exportVariable('CARGO_TERM_COLOR', 'always');
 
+	try {
+		await installToolchain(detectToolchain());
+		await installBins();
+	} catch (error: unknown) {
+		core.setFailed((error as Error).message);
+
+		throw error;
+	}
+
 	core.info('Adding ~/.cargo/bin to PATH');
 
-	core.addPath(path.join(os.homedir(), '.cargo', 'bin'));
+	core.addPath(path.join(getCargoHome(), 'bin'));
 }
 
 void run();
