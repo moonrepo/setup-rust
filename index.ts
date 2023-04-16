@@ -133,7 +133,8 @@ async function installBins() {
 		.getInput('bins')
 		.split(',')
 		.map((bin) => bin.trim())
-		.filter(Boolean);
+		.filter(Boolean)
+		.map((bin) => (bin.startsWith('cargo-') ? bin : `cargo-${bin}`));
 
 	if (bins.length === 0) {
 		return;
@@ -151,20 +152,7 @@ async function installBins() {
 		await exec.exec('cargo', ['install', 'cargo-binstall']);
 	}
 
-	await Promise.all(
-		bins.map((bin) => {
-			const [crate, version] = bin.split('@');
-			const args = ['binstall', crate.startsWith('cargo-') ? crate : `cargo-${crate}`];
-
-			if (version) {
-				args.push('--version', version);
-			}
-
-			core.info(`Installing ${crate}...`);
-
-			return exec.exec('cargo', args);
-		}),
-	);
+	await exec.exec('cargo', ['binstall', ' --no-confirm', '--log-level', 'info', ...bins]);
 }
 
 async function run() {
