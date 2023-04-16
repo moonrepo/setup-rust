@@ -1,4 +1,5 @@
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
@@ -135,6 +136,10 @@ async function run() {
 
 	// Always enable colored output
 	core.exportVariable('CARGO_TERM_COLOR', 'always');
+
+	core.info('Adding ~/.cargo/bin to PATH');
+
+	core.addPath(path.join(os.homedir(), '.cargo', 'bin'));
 }
 
 void run();

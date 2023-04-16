@@ -1,4 +1,4 @@
-name: 'Setup Rust'
+name: 'Setup rustup toolchain'
 author: 'Miles Johnson'
 description: 'Sets up Rust and Cargo.'
 inputs:
