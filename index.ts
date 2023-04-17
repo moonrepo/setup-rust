@@ -5,6 +5,7 @@ import * as exec from '@actions/exec';
 import * as tc from '@actions/tool-cache';
 import TOML from '@ltd/j-toml';
 import { CACHE_ENABLED, CARGO_HOME, restoreCache } from './src/cargo';
+import { extractRustVersion } from './src/rust';
 
 interface Toolchain {
 	channel: string;
@@ -118,7 +119,7 @@ async function installToolchain(toolchain: Toolchain) {
 
 	core.info('Logging installed toolchain versions');
 
-	await exec.exec('rustc', [`+${toolchain.channel}`, '--version', '--verbose']);
+	await extractRustVersion(toolchain.channel);
 }
 
 async function downloadAndInstallBinstall(binDir: string) {
@@ -199,9 +200,12 @@ async function run() {
 	core.exportVariable('CARGO_TERM_COLOR', 'always');
 
 	try {
-		await restoreCache();
 		await installToolchain(detectToolchain());
 		await installBins();
+
+		// Restore cache after the toolchain has been installed,
+		// as we use the rust version and commit hashes in the cache key!
+		await restoreCache();
 	} catch (error: unknown) {
 		core.setFailed((error as Error).message);
 

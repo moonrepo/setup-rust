@@ -22,6 +22,10 @@ outputs:
     description: 'The generated cache key used.'
   cache-hit:
     description: 'Indicates an exact match was found for the cache key.'
+  rust-version:
+    description: 'Version of the installed rustc.'
+  rust-hash:
+    description: 'Commit hash of the installed rustc.'
 runs:
   using: 'node16'
   main: 'dist/index.js'

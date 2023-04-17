@@ -1,5 +1,6 @@
 /* eslint-disable node/no-unsupported-features/node-builtins */
 
+import crypto from 'crypto';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -13,12 +14,45 @@ export const CARGO_HOME = process.env.CARGO_HOME || path.join(os.homedir(), '.ca
 
 export const CACHE_ENABLED = core.getBooleanInput('cache') || cache.isFeatureAvailable();
 
-export function getPrimaryCacheKey(): string {
-	return `setup-rustcargo-${process.platform}`;
+let CACHE_KEY = '';
+
+export async function getPrimaryCacheKey() {
+	if (CACHE_KEY) {
+		return CACHE_KEY;
+	}
+
+	core.info('Generating cache key');
+
+	const rustVersion = core.getState('rust-version');
+
+	core.debug(`Hashing Rust version = ${rustVersion}`);
+
+	const rustHash = core.getState('rust-hash');
+
+	core.debug(`Hashing Rust commit hash = ${rustHash}`);
+
+	const lockHash = await glob.hashFiles('Cargo.lock');
+
+	core.debug(`Hashing Cargo.lock = ${lockHash}`);
+
+	const hasher = crypto.createHash('sha1');
+	hasher.update(rustVersion);
+	hasher.update(rustHash);
+	hasher.update(lockHash);
+
+	// eslint-disable-next-line require-atomic-updates
+	CACHE_KEY = `setup-rustcargo-${process.platform}-${hasher.digest('hex')}`;
+
+	return CACHE_KEY;
 }
 
 export function getPathsToCache(): string[] {
-	return [path.join(CARGO_HOME, 'registry')];
+	return [
+		// ~/.cargo/registry
+		path.join(CARGO_HOME, 'registry'),
+		// /workspace/target/debug
+		path.join(process.cwd(), 'target/debug'),
+	];
 }
 
 export async function cleanCargoRegistry() {
@@ -45,7 +79,7 @@ export async function saveCache() {
 		return;
 	}
 
-	const primaryKey = getPrimaryCacheKey();
+	const primaryKey = await getPrimaryCacheKey();
 	const cacheHitKey = core.getState('cache-hit-key');
 
 	if (cacheHitKey === primaryKey) {
