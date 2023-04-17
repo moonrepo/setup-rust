@@ -132,17 +132,19 @@ export async function cleanCargoRegistry() {
 	// .cargo/registry/index - Delete .cache directories
 	const indexDir = path.join(registryDir, 'index');
 
-	for (const index of fs.readdirSync(indexDir)) {
-		if (fs.existsSync(path.join(indexDir, index, '.git'))) {
-			const dir = path.join(indexDir, index, '.cache');
+	if (fs.existsSync(indexDir)) {
+		for (const index of fs.readdirSync(indexDir)) {
+			if (fs.existsSync(path.join(indexDir, index, '.git'))) {
+				const dir = path.join(indexDir, index, '.cache');
 
-			core.debug(`Deleting ${dir}`);
+				core.debug(`Deleting ${dir}`);
 
-			try {
-				// eslint-disable-next-line no-await-in-loop
-				await io.rmRF(dir);
-			} catch (error: unknown) {
-				core.warning(`Failed to delete ${dir}: ${error}`);
+				try {
+					// eslint-disable-next-line no-await-in-loop
+					await io.rmRF(dir);
+				} catch (error: unknown) {
+					core.warning(`Failed to delete ${dir}: ${error}`);
+				}
 			}
 		}
 	}
