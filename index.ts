@@ -1,10 +1,11 @@
 import fs from 'fs';
 import path from 'path';
+import * as cache from '@actions/cache';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as tc from '@actions/tool-cache';
 import TOML from '@ltd/j-toml';
-import { CARGO_HOME } from './helpers';
+import { CARGO_HOME, getPathsToCache, getPrimaryCacheKey } from './helpers';
 
 interface Toolchain {
 	channel: string;
@@ -185,6 +186,35 @@ async function installBins() {
 	await exec.exec('cargo', ['binstall', '--no-confirm', '--log-level', 'info', ...bins]);
 }
 
+async function restoreCache() {
+	const enabled = core.getBooleanInput('cache');
+
+	if (!cache.isFeatureAvailable() || !enabled) {
+		return;
+	}
+
+	core.info('Attempting to restore cache');
+
+	const primaryKey = await getPrimaryCacheKey();
+	const cacheKey = await cache.restoreCache(
+		getPathsToCache(),
+		primaryKey,
+		[`setup-rustcargo-${process.platform}`, 'setup-rustcargo'],
+		{},
+		false,
+	);
+
+	if (cacheKey) {
+		core.saveState('cacheHitKey', cacheKey);
+		core.info(`Cache restored using key ${primaryKey}`);
+	} else {
+		core.warning(`Cache does not exist using key ${primaryKey}`);
+	}
+
+	core.setOutput('cache-key', cacheKey ?? primaryKey);
+	core.setOutput('cache-hit', !!cacheKey);
+}
+
 async function run() {
 	core.info('Setting cargo environment variables');
 
@@ -195,6 +225,7 @@ async function run() {
 	core.exportVariable('CARGO_TERM_COLOR', 'always');
 
 	try {
+		await restoreCache();
 		await installToolchain(detectToolchain());
 		await installBins();
 	} catch (error: unknown) {
