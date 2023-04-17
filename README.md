@@ -84,7 +84,7 @@ names (`cargo-` prefix optional).
 
 ### `actions-rs/*`
 
-The "official" actions have served their purpose, but after 3 years of no updates, server lack of
+The "official" actions have served their purpose, but after 3 years of no updates, severe lack of
 maintenance, and being full of deprecation warnings, it was time to create something new.
 
 Outside of being evergreen, this action also supports the following features:
