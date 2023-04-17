@@ -1,11 +1,10 @@
 import fs from 'fs';
 import path from 'path';
-import * as cache from '@actions/cache';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as tc from '@actions/tool-cache';
 import TOML from '@ltd/j-toml';
-import { CACHE_ENABLED, CARGO_HOME, getPathsToCache, getPrimaryCacheKey } from './helpers';
+import { CACHE_ENABLED, CARGO_HOME, restoreCache } from './src/cargo';
 
 interface Toolchain {
 	channel: string;
@@ -188,31 +187,6 @@ async function installBins() {
 	}
 
 	await exec.exec('cargo', ['binstall', '--no-confirm', '--log-level', 'info', ...bins]);
-}
-
-async function restoreCache() {
-	if (!CACHE_ENABLED) {
-		return;
-	}
-
-	core.info('Attempting to restore cache');
-
-	const primaryKey = await getPrimaryCacheKey();
-
-	const cacheKey = await cache.restoreCache(getPathsToCache(), primaryKey, [
-		`setup-rustcargo-${process.platform}`,
-		'setup-rustcargo',
-	]);
-
-	if (cacheKey) {
-		core.saveState('cache-hit-key', cacheKey);
-		core.info(`Cache restored using key ${primaryKey}`);
-	} else {
-		core.warning(`Cache does not exist using key ${primaryKey}`);
-	}
-
-	core.setOutput('cache-key', cacheKey ?? primaryKey);
-	core.setOutput('cache-hit', !!cacheKey);
 }
 
 async function run() {
