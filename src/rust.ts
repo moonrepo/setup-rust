@@ -18,14 +18,16 @@ export async function extractRustVersion(toolchain: string) {
 	});
 
 	out.split('\n').forEach((line) => {
-		const value = line.split(':')[1].trim();
-
 		if (line.startsWith('commit-hash')) {
+			const value = line.split(':')[1].trim();
+
 			core.setOutput('rust-hash', value);
 			RUST_HASH = value;
 
 			// version
 		} else if (line.startsWith('release')) {
+			const value = line.split(':')[1].trim();
+
 			core.setOutput('rust-version', value);
 			RUST_VERSION = value;
 		}
