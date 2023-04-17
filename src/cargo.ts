@@ -1,8 +1,12 @@
+/* eslint-disable node/no-unsupported-features/node-builtins */
+
+import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import * as cache from '@actions/cache';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
+import * as glob from '@actions/glob';
 
 // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
 export const CARGO_HOME = process.env.CARGO_HOME || path.join(os.homedir(), '.cargo');
@@ -15,6 +19,25 @@ export function getPrimaryCacheKey(): string {
 
 export function getPathsToCache(): string[] {
 	return [path.join(CARGO_HOME, 'registry')];
+}
+
+export async function cleanCargoRegistry() {
+	core.info('Cleaning cache before saving');
+
+	const registryDir = path.join(CARGO_HOME, 'registry');
+
+	// .cargo/registry/src - Delete entirely
+	await exec.exec('cargo', ['cache', '--autoclean']);
+
+	// .cargo/registry/index - Delete .cache directories
+	const globber = await glob.create(path.join(registryDir, 'index/**/.cache'));
+
+	for await (const file of globber.globGenerator()) {
+		core.debug(`Deleting ${file}`);
+		await fs.promises.unlink(file);
+	}
+
+	// .cargo/registry/cache - Do nothing?
 }
 
 export async function saveCache() {
@@ -30,9 +53,7 @@ export async function saveCache() {
 		return;
 	}
 
-	core.info('Cleaning cache before saving');
-
-	await exec.exec('cargo', ['cache', '--autoclean']);
+	await cleanCargoRegistry();
 
 	core.info(`Saving cache with key ${primaryKey}`);
 
