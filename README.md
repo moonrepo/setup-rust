@@ -94,8 +94,8 @@ The following optimizations and considerations are taken into account when cachi
   `src`, `.cache`, and any other unnecessary files.
 - Only the `/target/debug` profile is cached, as this profile is typically used for formatting,
   linting, and testing.
-- The following sources are hashed for the generated cache key: `Cargo.lock`, Rust version, Rust
-  commit hash, and operating system.
+- The following sources are hashed for the generated cache key: `$GITHUB_JOB`, `Cargo.lock`, Rust
+  version, Rust commit hash, and operating system.
 
 ## Compared to
 
