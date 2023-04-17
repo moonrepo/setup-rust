@@ -6,6 +6,9 @@ description:
 inputs:
   bins:
     description: 'Comma-separated list of global binaries to install into Cargo.'
+  cache:
+    description: 'Toggle caching of ~/.cargo/registry and /target.'
+    default: true
   channel:
     description: 'Toolchain specification/channel to install.'
   components:
@@ -14,10 +17,15 @@ inputs:
     description: 'Comma-separated list of additional targets to install.'
   profile:
     description: 'Profile to install. Defaults to "minimal".'
-outputs: {}
+outputs:
+  cache-key:
+    description: 'The cache key used.'
+  cache-hit:
+    description: 'A boolean to indicate an exact match was found for the cache key.'
 runs:
   using: 'node16'
   main: 'dist/index.js'
+  post: 'dist/post/index.js'
 branding:
   icon: 'settings'
   color: 'orange'

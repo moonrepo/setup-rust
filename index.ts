@@ -1,10 +1,10 @@
 import fs from 'fs';
-import os from 'os';
 import path from 'path';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as tc from '@actions/tool-cache';
 import TOML from '@ltd/j-toml';
+import { CARGO_HOME } from './helpers';
 
 interface Toolchain {
 	channel: string;
@@ -23,14 +23,6 @@ const DEFAULT_TOOLCHAIN: Toolchain = {
 	profile: 'minimal',
 	targets: [],
 };
-
-function getCargoHome(): string {
-	if (process.env.CARGO_HOME) {
-		return process.env.CARGO_HOME;
-	}
-
-	return path.join(os.homedir(), '.cargo');
-}
 
 function parseConfig(configPath: string): Partial<Toolchain> {
 	const contents = fs.readFileSync(configPath, 'utf8').trim();
@@ -184,7 +176,7 @@ async function installBins() {
 
 	core.info('Installing additional binaries');
 
-	const binDir = path.join(getCargoHome(), 'bin');
+	const binDir = path.join(CARGO_HOME, 'bin');
 
 	if (!fs.existsSync(path.join(binDir, 'cargo-binstall'))) {
 		await downloadAndInstallBinstall(binDir);
@@ -213,7 +205,7 @@ async function run() {
 
 	core.info('Adding ~/.cargo/bin to PATH');
 
-	core.addPath(path.join(getCargoHome(), 'bin'));
+	core.addPath(path.join(CARGO_HOME, 'bin'));
 }
 
 void run();
