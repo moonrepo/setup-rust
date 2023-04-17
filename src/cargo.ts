@@ -61,16 +61,19 @@ export async function cleanCargoRegistry() {
 	await exec.exec('cargo', ['cache', '--autoclean']);
 
 	// .cargo/registry/index - Delete .cache directories
-	const globber = await glob.create(path.join(registryDir, 'index/*/.cache'));
+	const indexDir = path.join(registryDir, 'index');
 
-	for await (const file of globber.globGenerator()) {
-		if (fs.existsSync(path.join(path.dirname(file), '.git'))) {
-			core.debug(`Deleting ${file}`);
+	for (const index of fs.readdirSync(indexDir)) {
+		if (fs.existsSync(path.join(indexDir, index, '.git'))) {
+			const dir = path.join(indexDir, index, '.cache');
+
+			core.debug(`Deleting ${dir}`);
 
 			try {
-				await io.rmRF(file);
+				// eslint-disable-next-line no-await-in-loop
+				await io.rmRF(dir);
 			} catch (error: unknown) {
-				core.warning(`Failed to delete ${file}: ${error}`);
+				core.warning(`Failed to delete ${dir}: ${error}`);
 			}
 		}
 	}
