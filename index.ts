@@ -171,6 +171,10 @@ async function installBins() {
 		.filter(Boolean)
 		.map((bin) => (bin.startsWith('cargo-') ? bin : `cargo-${bin}`));
 
+	if (core.getBooleanInput('cache')) {
+		bins.push('cargo-cache');
+	}
+
 	if (bins.length === 0) {
 		return;
 	}
