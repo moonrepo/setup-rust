@@ -7,11 +7,80 @@ import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as glob from '@actions/glob';
 import * as io from '@actions/io';
+import * as tc from '@actions/tool-cache';
 import { RUST_HASH, RUST_VERSION } from './rust';
 
 export const CARGO_HOME = process.env.CARGO_HOME ?? path.join(os.homedir(), '.cargo');
 
 export const CACHE_ENABLED = core.getBooleanInput('cache') || cache.isFeatureAvailable();
+
+export async function downloadAndInstallBinstall(binDir: string) {
+	core.info('cargo-binstall does not exist, attempting to install');
+
+	let arch;
+	let file;
+
+	switch (process.arch) {
+		case 'x64':
+			arch = 'x86_64';
+			break;
+		case 'arm64':
+			arch = 'aarch64';
+			break;
+		default:
+			throw new Error(`Unsupported architecture: ${process.arch}`);
+	}
+
+	switch (process.platform) {
+		case 'linux':
+			file = `${arch}-unknown-linux-gnu.tgz`;
+			break;
+		case 'darwin':
+			file = `${arch}-apple-darwin.zip`;
+			break;
+		case 'win32':
+			file = `${arch}-pc-windows-msvc.zip`;
+			break;
+		default:
+			throw new Error(`Unsupported platform: ${process.platform}`);
+	}
+
+	const url = `https://github.com/cargo-bins/cargo-binstall/releases/latest/download/cargo-binstall-${file}`;
+	const dlPath = await tc.downloadTool(url);
+
+	if (url.endsWith('.zip')) {
+		await tc.extractZip(dlPath, binDir);
+	} else if (url.endsWith('.tgz')) {
+		await tc.extractTar(dlPath, binDir);
+	}
+}
+
+export async function installBins() {
+	const bins = core
+		.getInput('bins')
+		.split(',')
+		.map((bin) => bin.trim())
+		.filter(Boolean)
+		.map((bin) => (bin.startsWith('cargo-') ? bin : `cargo-${bin}`));
+
+	if (CACHE_ENABLED) {
+		bins.push('cargo-cache');
+	}
+
+	if (bins.length === 0) {
+		return;
+	}
+
+	core.info('Installing additional binaries');
+
+	const binDir = path.join(CARGO_HOME, 'bin');
+
+	if (!fs.existsSync(path.join(binDir, 'cargo-binstall'))) {
+		await downloadAndInstallBinstall(binDir);
+	}
+
+	await exec.exec('cargo', ['binstall', '--no-confirm', '--log-level', 'info', ...bins]);
+}
 
 export function getCachePaths(): string[] {
 	return [
