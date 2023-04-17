@@ -1,10 +1,11 @@
 import fs from 'fs';
-import os from 'os';
 import path from 'path';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as tc from '@actions/tool-cache';
 import TOML from '@ltd/j-toml';
+import { CACHE_ENABLED, CARGO_HOME, restoreCache } from './src/cargo';
+import { extractRustVersion } from './src/rust';
 
 interface Toolchain {
 	channel: string;
@@ -23,14 +24,6 @@ const DEFAULT_TOOLCHAIN: Toolchain = {
 	profile: 'minimal',
 	targets: [],
 };
-
-function getCargoHome(): string {
-	if (process.env.CARGO_HOME) {
-		return process.env.CARGO_HOME;
-	}
-
-	return path.join(os.homedir(), '.cargo');
-}
 
 function parseConfig(configPath: string): Partial<Toolchain> {
 	const contents = fs.readFileSync(configPath, 'utf8').trim();
@@ -126,7 +119,7 @@ async function installToolchain(toolchain: Toolchain) {
 
 	core.info('Logging installed toolchain versions');
 
-	await exec.exec('rustc', [`+${toolchain.channel}`, '--version', '--verbose']);
+	await extractRustVersion(toolchain.channel);
 }
 
 async function downloadAndInstallBinstall(binDir: string) {
@@ -178,13 +171,17 @@ async function installBins() {
 		.filter(Boolean)
 		.map((bin) => (bin.startsWith('cargo-') ? bin : `cargo-${bin}`));
 
+	if (CACHE_ENABLED) {
+		bins.push('cargo-cache');
+	}
+
 	if (bins.length === 0) {
 		return;
 	}
 
 	core.info('Installing additional binaries');
 
-	const binDir = path.join(getCargoHome(), 'bin');
+	const binDir = path.join(CARGO_HOME, 'bin');
 
 	if (!fs.existsSync(path.join(binDir, 'cargo-binstall'))) {
 		await downloadAndInstallBinstall(binDir);
@@ -205,6 +202,10 @@ async function run() {
 	try {
 		await installToolchain(detectToolchain());
 		await installBins();
+
+		// Restore cache after the toolchain has been installed,
+		// as we use the rust version and commit hashes in the cache key!
+		await restoreCache();
 	} catch (error: unknown) {
 		core.setFailed((error as Error).message);
 
@@ -213,7 +214,7 @@ async function run() {
 
 	core.info('Adding ~/.cargo/bin to PATH');
 
-	core.addPath(path.join(getCargoHome(), 'bin'));
+	core.addPath(path.join(CARGO_HOME, 'bin'));
 }
 
 void run();

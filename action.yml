@@ -6,6 +6,9 @@ description:
 inputs:
   bins:
     description: 'Comma-separated list of global binaries to install into Cargo.'
+  cache:
+    description: 'Toggle caching of ~/.cargo/registry and /target/debug directories.'
+    default: true
   channel:
     description: 'Toolchain specification/channel to install.'
   components:
@@ -14,10 +17,19 @@ inputs:
     description: 'Comma-separated list of additional targets to install.'
   profile:
     description: 'Profile to install. Defaults to "minimal".'
-outputs: {}
+outputs:
+  cache-key:
+    description: 'The generated cache key used.'
+  cache-hit:
+    description: 'Indicates an exact match was found for the cache key.'
+  rust-version:
+    description: 'Version of the installed rustc.'
+  rust-hash:
+    description: 'Commit hash of the installed rustc.'
 runs:
   using: 'node16'
   main: 'dist/index.js'
+  post: 'dist/post/index.js'
 branding:
   icon: 'settings'
   color: 'orange'

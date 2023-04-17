@@ -13,13 +13,6 @@ jobs:
       - run: cargo test
 ```
 
-## To Do
-
-- [x] Install Rust toolchain with `rustup`
-- [x] Install Cargo bins with `cargo-binstall`
-- [ ] Cache `~/.cargo` directory (not everything)
-- [ ] Cache `target` directory?
-
 ## Configuring the Rust toolchain
 
 This action will automatically install the appropriate toolchain with `rustup` by inspecting the
@@ -80,6 +73,30 @@ names (`cargo-` prefix optional).
 > Binaries are installed with [`cargo-binstall`](https://crates.io/crates/cargo-binstall) under the
 > hood.
 
+## Caching in CI
+
+By default this action will cache the `~/.cargo/registry` and `/target/debug` directories to improve
+CI times. To disable caching, set the `cache` input to `false`.
+
+```yaml
+- uses: moonrepo/setup-rust@v0
+  with:
+    cache: false
+```
+
+The following optimizations and considerations are taken into account when caching:
+
+- The `~/.cargo/bin` directory is not cached as we manage binary installation in this action via the
+  `bins` input.
+- The `~/.cargo/git` directory is not cached as it's not necessary for CI. When required by Cargo or
+  a crate, a checkout will be performed on-demand.
+- The `~/.cargo/registry` directory is _cleaned_ before saving the cache. This includes removing
+  `src`, `.cache`, and any other unnecessary files.
+- Only the `/target/debug` profile is cached, as this profile is typically used for formatting,
+  linting, and testing.
+- The following sources are hashed for the generated cache key: `Cargo.lock`, Rust version, Rust
+  commit hash, and operating system.
+
 ## Compared to
 
 ### `actions-rs/*`
@@ -89,6 +106,7 @@ maintenance, and being full of deprecation warnings, it was time to create somet
 
 Outside of being evergreen, this action also supports the following features:
 
+- Automatically caches.
 - Installs Cargo bins.
 - Assumes `rustup`, `cargo`, and other commands are available globally. This allows you to use them
   directly in a `run` command, without having to use `actions-rs/cargo`.
@@ -105,4 +123,5 @@ but this action also supports the following features:
 
 - Extracts the toolchain/channel from `rust-toolchain.toml` and `rust-toolchain` configuration
   files.
+- Automatically caches.
 - Installs Cargo bins.
