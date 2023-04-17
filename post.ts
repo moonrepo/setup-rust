@@ -1,17 +1,15 @@
 import * as cache from '@actions/cache';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
-import { getPathsToCache, getPrimaryCacheKey } from './helpers';
+import { CACHE_ENABLED, getPathsToCache, getPrimaryCacheKey } from './helpers';
 
 async function saveCache() {
-	const enabled = core.getBooleanInput('cache');
-
-	if (!cache.isFeatureAvailable() || !enabled) {
+	if (!CACHE_ENABLED) {
 		return;
 	}
 
 	const primaryKey = getPrimaryCacheKey();
-	const cacheHitKey = core.getState('cacheHitKey');
+	const cacheHitKey = core.getState('cache-hit-key');
 
 	if (cacheHitKey === primaryKey) {
 		core.info(`Cache hit occured on the key ${cacheHitKey}, not saving cache`);
@@ -24,7 +22,7 @@ async function saveCache() {
 
 	core.info(`Saving cache with key ${primaryKey}`);
 
-	await cache.saveCache(getPathsToCache(), primaryKey, {}, false);
+	await cache.saveCache(getPathsToCache(), primaryKey);
 }
 
 async function run() {

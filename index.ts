@@ -5,7 +5,7 @@ import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as tc from '@actions/tool-cache';
 import TOML from '@ltd/j-toml';
-import { CARGO_HOME, getPathsToCache, getPrimaryCacheKey } from './helpers';
+import { CACHE_ENABLED, CARGO_HOME, getPathsToCache, getPrimaryCacheKey } from './helpers';
 
 interface Toolchain {
 	channel: string;
@@ -171,7 +171,7 @@ async function installBins() {
 		.filter(Boolean)
 		.map((bin) => (bin.startsWith('cargo-') ? bin : `cargo-${bin}`));
 
-	if (core.getBooleanInput('cache')) {
+	if (CACHE_ENABLED) {
 		bins.push('cargo-cache');
 	}
 
@@ -191,25 +191,21 @@ async function installBins() {
 }
 
 async function restoreCache() {
-	const enabled = core.getBooleanInput('cache');
-
-	if (!cache.isFeatureAvailable() || !enabled) {
+	if (!CACHE_ENABLED) {
 		return;
 	}
 
 	core.info('Attempting to restore cache');
 
 	const primaryKey = await getPrimaryCacheKey();
-	const cacheKey = await cache.restoreCache(
-		getPathsToCache(),
-		primaryKey,
-		[`setup-rustcargo-${process.platform}`, 'setup-rustcargo'],
-		{},
-		false,
-	);
+
+	const cacheKey = await cache.restoreCache(getPathsToCache(), primaryKey, [
+		`setup-rustcargo-${process.platform}`,
+		'setup-rustcargo',
+	]);
 
 	if (cacheKey) {
-		core.saveState('cacheHitKey', cacheKey);
+		core.saveState('cache-hit-key', cacheKey);
 		core.info(`Cache restored using key ${primaryKey}`);
 	} else {
 		core.warning(`Cache does not exist using key ${primaryKey}`);
