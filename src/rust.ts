@@ -1,5 +1,10 @@
+/* eslint-disable import/no-mutable-exports */
+
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
+
+export let RUST_VERSION = '';
+export let RUST_HASH = '';
 
 export async function extractRustVersion(toolchain: string) {
 	let out = '';
@@ -13,19 +18,16 @@ export async function extractRustVersion(toolchain: string) {
 	});
 
 	out.split('\n').forEach((line) => {
-		let key = '';
-
-		if (line.startsWith('commit-hash')) {
-			key = 'rust-hash';
-		} else if (line.startsWith('release')) {
-			key = 'rust-version';
-		} else {
-			return;
-		}
-
 		const value = line.split(':')[1].trim();
 
-		core.saveState(key, value);
-		core.setOutput(key, value);
+		if (line.startsWith('commit-hash')) {
+			core.setOutput('rust-hash', value);
+			RUST_HASH = value;
+
+			// version
+		} else if (line.startsWith('release')) {
+			core.setOutput('rust-version', value);
+			RUST_VERSION = value;
+		}
 	});
 }

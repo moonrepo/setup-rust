@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import * as cache from '@actions/cache';
@@ -6,31 +7,35 @@ import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as glob from '@actions/glob';
 import * as io from '@actions/io';
+import { RUST_HASH, RUST_VERSION } from './rust';
 
 export const CARGO_HOME = process.env.CARGO_HOME ?? path.join(os.homedir(), '.cargo');
 
 export const CACHE_ENABLED = core.getBooleanInput('cache') || cache.isFeatureAvailable();
 
-let CACHE_KEY = '';
+export function getCachePaths(): string[] {
+	return [
+		// ~/.cargo/registry
+		path.join(CARGO_HOME, 'registry'),
+		// /workspace/target/debug
+		path.join(process.env.GITHUB_WORKSPACE ?? process.cwd(), 'target/debug'),
+	];
+}
+
+export function getCachePrefixes(): string[] {
+	return [`setup-rustcargo-${process.platform}`, 'setup-rustcargo'];
+}
 
 export async function getPrimaryCacheKey() {
-	if (CACHE_KEY) {
-		return CACHE_KEY;
-	}
-
 	const hasher = crypto.createHash('sha1');
 
 	core.info('Generating cache key');
 
-	const rustVersion = core.getState('rust-version');
+	core.debug(`Hashing Rust version = ${RUST_VERSION}`);
+	hasher.update(RUST_VERSION);
 
-	core.debug(`Hashing Rust version = ${rustVersion}`);
-	hasher.update(rustVersion);
-
-	const rustHash = core.getState('rust-hash');
-
-	core.debug(`Hashing Rust commit hash = ${rustHash}`);
-	hasher.update(rustHash);
+	core.debug(`Hashing Rust commit hash = ${RUST_HASH}`);
+	hasher.update(RUST_HASH);
 
 	const lockHash = await glob.hashFiles('Cargo.lock');
 
@@ -44,19 +49,7 @@ export async function getPrimaryCacheKey() {
 		hasher.update(job);
 	}
 
-	// eslint-disable-next-line require-atomic-updates
-	CACHE_KEY = `setup-rustcargo-${process.platform}-${hasher.digest('hex')}`;
-
-	return CACHE_KEY;
-}
-
-export function getPathsToCache(): string[] {
-	return [
-		// ~/.cargo/registry
-		path.join(CARGO_HOME, 'registry'),
-		// /workspace/target/debug
-		path.join(process.env.GITHUB_WORKSPACE ?? process.cwd(), 'target/debug'),
-	];
+	return `${getCachePrefixes()[0]}-${hasher.digest('hex')}`;
 }
 
 export async function cleanCargoRegistry() {
@@ -68,11 +61,18 @@ export async function cleanCargoRegistry() {
 	await exec.exec('cargo', ['cache', '--autoclean']);
 
 	// .cargo/registry/index - Delete .cache directories
-	const globber = await glob.create(path.join(registryDir, 'index/**/.cache'));
+	const globber = await glob.create(path.join(registryDir, 'index/*/.cache'));
 
 	for await (const file of globber.globGenerator()) {
-		core.debug(`Deleting ${file}`);
-		await io.rmRF(file);
+		if (fs.existsSync(path.join(path.dirname(file), '.git'))) {
+			core.debug(`Deleting ${file}`);
+
+			try {
+				await io.rmRF(file);
+			} catch (error: unknown) {
+				core.warning(`Failed to delete ${file}: ${error}`);
+			}
+		}
 	}
 
 	// .cargo/registry/cache - Do nothing?
@@ -95,7 +95,7 @@ export async function saveCache() {
 
 	core.info(`Saving cache with key ${primaryKey}`);
 
-	await cache.saveCache(getPathsToCache(), primaryKey);
+	await cache.saveCache(getCachePaths(), primaryKey);
 }
 
 export async function restoreCache() {
@@ -106,11 +106,7 @@ export async function restoreCache() {
 	core.info('Attempting to restore cache');
 
 	const primaryKey = await getPrimaryCacheKey();
-
-	const cacheKey = await cache.restoreCache(getPathsToCache(), primaryKey, [
-		`setup-rustcargo-${process.platform}`,
-		'setup-rustcargo',
-	]);
+	const cacheKey = await cache.restoreCache(getCachePaths(), primaryKey, getCachePrefixes());
 
 	if (cacheKey) {
 		core.saveState('cache-hit-key', cacheKey);
