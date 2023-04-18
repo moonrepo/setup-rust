@@ -189,6 +189,7 @@ export async function saveCache() {
 	}
 
 	await cleanCargoRegistry();
+	await cleanTargetProfile();
 
 	core.info(`Saving cache with key ${primaryKey}`);
 
