@@ -6,11 +6,13 @@ import * as cache from '@actions/cache';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as glob from '@actions/glob';
-import * as io from '@actions/io';
 import * as tc from '@actions/tool-cache';
+import { rmrf } from './fs';
 import { RUST_HASH, RUST_VERSION } from './rust';
 
 export const CARGO_HOME = process.env.CARGO_HOME ?? path.join(os.homedir(), '.cargo');
+
+export const WORKSPACE_ROOT = process.env.GITHUB_WORKSPACE ?? process.cwd();
 
 export const CACHE_ENABLED = core.getBooleanInput('cache') || cache.isFeatureAvailable();
 
@@ -87,12 +89,12 @@ export function getCachePaths(): string[] {
 		// ~/.cargo/registry
 		path.join(CARGO_HOME, 'registry'),
 		// /workspace/target/debug
-		path.join(process.env.GITHUB_WORKSPACE ?? process.cwd(), 'target/debug'),
+		path.join(WORKSPACE_ROOT, 'target/debug'),
 	];
 }
 
 export function getCachePrefixes(): string[] {
-	return [`setup-rustcargo-v0-${process.platform}`, 'setup-rustcargo-v0'];
+	return [`setup-rustcargo-v1-${process.platform}`, 'setup-rustcargo-v1'];
 }
 
 export async function getPrimaryCacheKey() {
@@ -122,7 +124,7 @@ export async function getPrimaryCacheKey() {
 }
 
 export async function cleanCargoRegistry() {
-	core.info('Cleaning cache before saving');
+	core.info('Cleaning ~/.cargo before saving');
 
 	const registryDir = path.join(CARGO_HOME, 'registry');
 
@@ -133,23 +135,44 @@ export async function cleanCargoRegistry() {
 	const indexDir = path.join(registryDir, 'index');
 
 	if (fs.existsSync(indexDir)) {
-		for (const index of fs.readdirSync(indexDir)) {
-			if (fs.existsSync(path.join(indexDir, index, '.git'))) {
-				const dir = path.join(indexDir, index, '.cache');
-
-				core.debug(`Deleting ${dir}`);
-
-				try {
-					// eslint-disable-next-line no-await-in-loop
-					await io.rmRF(dir);
-				} catch (error: unknown) {
-					core.warning(`Failed to delete ${dir}: ${error}`);
+		await Promise.all(
+			fs.readdirSync(indexDir).map(async (index) => {
+				if (fs.existsSync(path.join(indexDir, index, '.git'))) {
+					await rmrf(path.join(indexDir, index, '.cache'));
 				}
-			}
-		}
+			}),
+		);
 	}
 
 	// .cargo/registry/cache - Do nothing?
+}
+
+// https://doc.rust-lang.org/cargo/guide/build-cache.html
+export async function cleanTargetProfile() {
+	core.info('Cleaning target/debug before saving');
+
+	const targetDir = path.join(WORKSPACE_ROOT, 'target/debug');
+
+	// target/debug/{examples,incremental} - Not required in CI
+	core.info('Removing examples and incremental directories');
+
+	await Promise.all(
+		['examples', 'incremental'].map(async (dirName) => {
+			const dir = path.join(targetDir, dirName);
+
+			if (fs.existsSync(dir)) {
+				await rmrf(dir);
+			}
+		}),
+	);
+
+	// target/debug/**/*.d - Not required in CI?
+	core.info('Removing dep-info files (*.d)');
+
+	const globber = await glob.create(path.join(targetDir, '**/*.d'));
+	const files = await globber.glob();
+
+	await Promise.all(files.map(rmrf));
 }
 
 export async function saveCache() {
