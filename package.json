@@ -1,11 +1,11 @@
 {
   "name": "@moonrepo/setup-rust",
-  "version": "0.4.2",
+  "version": "0.4.1",
   "description": "A GitHub action for setting up Rust and Cargo.",
   "main": "dist/index.js",
   "scripts": {
     "build": "ncc build ./index.ts && ncc build ./post.ts --out ./dist/post",
-    "check": "pnpm run lint && pnpm run typecheck",
+    "check": "npm run lint && npm run typecheck",
     "lint": "eslint --ext .ts,.js --fix .",
     "typecheck": "tsc --noEmit"
   },
