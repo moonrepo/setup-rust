@@ -86,16 +86,22 @@ CI times. To disable caching, set the `cache` input to `false`.
 
 The following optimizations and considerations are taken into account when caching:
 
-- The `~/.cargo/bin` directory is not cached as we manage binary installation in this action via the
-  `bins` input.
-- The `~/.cargo/git` directory is not cached as it's not necessary for CI. When required by Cargo or
-  a crate, a checkout will be performed on-demand.
-- The `~/.cargo/registry` directory is _cleaned_ before saving the cache. This includes removing
-  `src`, `.cache`, and any other unnecessary files.
-- Only the `/target/debug` profile is cached, as this profile is typically used for formatting,
-  linting, and testing.
-- The following sources are hashed for the generated cache key: `$GITHUB_JOB`, `Cargo.lock`, Rust
-  version, Rust commit hash, and operating system.
+- `~/.cargo`
+  - The `/bin` directory is not cached as we manage binary installation in this action via the
+    `bins` input.
+  - The `/git` directory is not cached as it's not necessary for CI. When required by Cargo or a
+    crate, a checkout will be performed on-demand.
+  - The `/registry` directory is _cleaned_ before saving the cache. This includes removing `src`,
+    `.cache`, and any other unnecessary files.
+- `/target/debug`
+  - Only the `debug` profile is cached, as this profile is typically used for formatting, linting,
+    and testing.
+  - The `/examples` and `/incremental` directories are not cached as they are not necessary for CI.
+  - All dep-info (`*.d`) files are removed, as they're meant for build systems and signaling
+    re-executions.
+
+The following sources are hashed for the generated cache key: `$GITHUB_JOB`, `Cargo.lock`, Rust
+version, Rust commit hash, and OS.
 
 ## Compared to
 

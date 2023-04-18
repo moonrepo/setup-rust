@@ -166,8 +166,8 @@ export async function cleanTargetProfile() {
 		}),
 	);
 
-	// target/debug/**/*.d - Dep info files for build systems, not required in CI
-	core.info('Removing depinfo files (*.d)');
+	// target/debug/**/*.d - Not required in CI?
+	core.info('Removing dep-info files (*.d)');
 
 	const globber = await glob.create(path.join(targetDir, '**/*.d'));
 	const files = await globber.glob();
