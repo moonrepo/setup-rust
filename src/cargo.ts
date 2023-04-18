@@ -7,7 +7,7 @@ import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as glob from '@actions/glob';
 import * as tc from '@actions/tool-cache';
-import { rmrf } from './fs';
+import { padDate, rmrf } from './helpers';
 import { RUST_HASH, RUST_VERSION } from './rust';
 
 export const CARGO_HOME = process.env.CARGO_HOME ?? path.join(os.homedir(), '.cargo');
@@ -129,7 +129,19 @@ export async function cleanCargoRegistry() {
 	const registryDir = path.join(CARGO_HOME, 'registry');
 
 	// .cargo/registry/src - Delete entirely
-	await exec.exec('cargo', ['cache', '--autoclean']);
+	const staleDate = new Date();
+
+	// eslint-disable-next-line no-magic-numbers
+	staleDate.setDate(staleDate.getDate() - 14);
+
+	await exec.exec('cargo', [
+		'cache',
+		'--autoclean',
+		'--remove-if-older-than',
+		`${staleDate.getFullYear()}.${padDate(staleDate.getMonth() + 1)}.${padDate(
+			staleDate.getDate(),
+		)}`,
+	]);
 
 	// .cargo/registry/index - Delete .cache directories
 	const indexDir = path.join(registryDir, 'index');

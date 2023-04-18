@@ -10,3 +10,7 @@ export async function rmrf(dir: string) {
 		core.warning(`Failed to delete ${dir}: ${error}`);
 	}
 }
+
+export function padDate(value: number) {
+	return String(value).padStart(2, '0');
+}

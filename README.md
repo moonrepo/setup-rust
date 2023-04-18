@@ -93,6 +93,7 @@ The following optimizations and considerations are taken into account when cachi
     crate, a checkout will be performed on-demand.
   - The `/registry` directory is _cleaned_ before saving the cache. This includes removing `src`,
     `.cache`, and any other unnecessary files.
+  - Registry artifacts older than 14 days will be removed.
 - `/target/debug`
   - Only the `debug` profile is cached, as this profile is typically used for formatting, linting,
     and testing.
