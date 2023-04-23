@@ -94,27 +94,27 @@ export function detectToolchain(): Toolchain {
 		});
 	} else {
 		core.info('Loading rust-toolchain.toml or rust-toolchain file');
-    const toolchainFile = core.getInput('rust-toolchain-file');
+		const toolchainFile = core.getInput('rust-toolchain-file');
 
-    if (toolchainFile) {
-      if (fs.existsSync(toolchainFile)) {
-        Object.assign(toolchain, parseConfig(toolchainFile));
-      } else {
-        core.setFailed('Not found toolchain config file');
-        throw new Error('Not found toolchain config file');
-      }
-    } else {
-      for (const configName of ['rust-toolchain.toml', 'rust-toolchain']) {
-        const configPath = path.join(process.cwd(), configName);
+		if (toolchainFile) {
+			if (fs.existsSync(toolchainFile)) {
+				Object.assign(toolchain, parseConfig(toolchainFile));
+			} else {
+				core.setFailed('Not found toolchain config file');
+				throw new Error('Not found toolchain config file');
+			}
+		} else {
+			for (const configName of ['rust-toolchain.toml', 'rust-toolchain']) {
+				const configPath = path.join(process.cwd(), configName);
 
-        if (fs.existsSync(configPath)) {
-          core.debug(`Found ${configName}, parsing TOML`);
+				if (fs.existsSync(configPath)) {
+					core.debug(`Found ${configName}, parsing TOML`);
 
-          Object.assign(toolchain, parseConfig(configPath));
-          break;
-        }
-      }
-    }
+					Object.assign(toolchain, parseConfig(configPath));
+					break;
+				}
+			}
+		}
 	}
 
 	core.info('Inheriting toolchain settings from inputs');
