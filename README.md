@@ -17,7 +17,7 @@ jobs:
 
 This action will automatically install the appropriate toolchain with `rustup` by inspecting the
 `RUSTUP_TOOLCHAIN` environment variable or the `rust-toolchain.toml` (preferred) or `rust-toolchain`
-configuration files. If no toolchain found, will default to `stable`.
+configuration files. To specify the location of the toolchain configuration files you can use `rust-toolchain-file` option. If no toolchain found, will default to `stable`.
 
 ```toml
 # rust-toolchain.toml
