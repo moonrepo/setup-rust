@@ -10,7 +10,7 @@ inputs:
     description: 'Toggle caching of ~/.cargo/registry and /target/debug directories.'
     default: true
   rust-toolchain-file:
-    description: 'Path to a rust-toolchain file to install.'
+    description: 'Path to a rust-toolchain file.'
   channel:
     description: 'Toolchain specification/channel to install.'
   components:
