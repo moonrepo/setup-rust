@@ -69,10 +69,18 @@ export function parseConfig(configPath: string): Partial<Toolchain> {
 
 	const config = TOML.parse(contents) as unknown as ToolchainConfig;
 
-	if (config.toolchain.channel) {
-		core.debug('Found channel in [toolchain] section');
+	if (config.toolchain) {
+		if (core.getBooleanInput('inherit-toolchain')) {
+			core.debug('Inheriting entire [toolchain] section');
 
-		return { channel: config.toolchain.channel };
+			return { ...config.toolchain };
+		}
+
+		if (config.toolchain.channel) {
+			core.debug('Found channel in [toolchain] section');
+
+			return { channel: config.toolchain.channel };
+		}
 	}
 
 	core.debug('No channel found in [toolchain] section');
