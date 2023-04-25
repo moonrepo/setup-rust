@@ -17,6 +17,9 @@ inputs:
     description: 'Comma-separated list of additional targets to install.'
   profile:
     description: 'Profile to install. Defaults to "minimal".'
+  inherit-toolchain:
+    description: 'Inherit all toolchain settings from the rust-toolchain.toml file.'
+    default: false
 outputs:
   cache-key:
     description: 'The generated cache key used.'
