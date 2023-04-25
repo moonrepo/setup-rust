@@ -1,6 +1,8 @@
 # Setup Rust and Cargo
 
-A GitHub action for setting up Rust and Cargo.
+A one-stop-shop GitHub action for setting up Rust and Cargo. Will automatically setup the Rust
+toolchain with `rustup`, cache the `~/.cargo/registry` and `/target/debug` directories, and install
+Cargo binaries (when applicable).
 
 ```yaml
 jobs:
@@ -27,15 +29,16 @@ channel = "1.68.0"
 
 > When loading a configuration file, only the `channel` field is used, while the other fields are
 > ignored. We chose this approach, as those other fields are typically for develop/release
-> workflows, but not for CI, which requires a minimal/granular setup.
+> workflows, but not for CI, which requires a minimal/granular setup. However, this can be
+> overwritten with the `inherit-toolchain` input.
 
-The toolchain/channel can also be explicitly configured with the `toolchain` input, which takes
+The toolchain/channel can also be explicitly configured with the `channel` input, which takes
 highest precedence.
 
 ```yaml
 - uses: moonrepo/setup-rust@v0
   with:
-    toolchain: '1.65.0'
+    channel: '1.65.0'
 ```
 
 ### Profile and components
@@ -93,15 +96,16 @@ The following optimizations and considerations are taken into account when cachi
     crate, a checkout will be performed on-demand.
   - The `/registry` directory is _cleaned_ before saving the cache. This includes removing `src`,
     `.cache`, and any other unnecessary files.
-- `/target/debug`
-  - Only the `debug` profile is cached, as this profile is typically used for formatting, linting,
+- `/target`
+  - Only the `/debug` profile is cached, as this profile is typically used for formatting, linting,
     and testing.
-  - The `/examples` and `/incremental` directories are not cached as they are not necessary for CI.
+  - The `/examples` and `/incremental` sub-directories are not cached as they are not necessary for
+    CI.
   - All dep-info (`*.d`) files are removed, as they're meant for build systems and signaling
     re-executions.
 
-The following sources are hashed for the generated cache key: `$GITHUB_JOB`, `Cargo.lock`, Rust
-version, Rust commit hash, and OS.
+> The following sources are hashed for the generated cache key: `$GITHUB_JOB`, `Cargo.lock`, Rust
+> version, Rust commit hash, and OS.
 
 ## Compared to
 
@@ -124,10 +128,26 @@ However, this action _does not_:
 
 ### `dtolnay/rust-toolchain`
 
-This action is very similar to `dtolnay/rust-toolchain`, which was a great implementation reference,
-but this action also supports the following features:
+Our action is very similar to theirs, which was a great implementation reference, but our action
+also supports the following features:
 
 - Extracts the toolchain/channel from `rust-toolchain.toml` and `rust-toolchain` configuration
   files.
 - Automatically caches.
 - Installs Cargo bins.
+
+### `Swatinem/rust-cache`
+
+Their action only caches for Rust/Cargo, it doesn't actually setup Rust/Cargo. Our action is meant
+to do _everything_, but it's not as configurable as the alternatives.
+
+Here are the key differences between the two:
+
+- Theirs caches the entire `~/.cargo` directory, while our action only caches `~/.cargo/registry`.
+  [View the reasoning above](#caching-in-ci).
+  - Our action also avoids an array of `~/.cargo/bin` issues that theirs currently has.
+- Theirs includes compiler specific environment variables in the cache key, while our action
+  currently does not.
+- Theirs supports a handful of inputs for controlling the cache key, while ours does not.
+- Theirs is a bit more smart in what it caches, while ours is a bit more brute force. We simply
+  cache specific directories as-is after cleaning.
