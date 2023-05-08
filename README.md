@@ -79,12 +79,14 @@ names.
 ## Caching in CI
 
 By default this action will cache the `~/.cargo/registry` and `/target/debug` directories to improve
-CI times. To disable caching, set the `cache` input to `false`.
+CI times. To disable caching, set the `cache` input to `false`. Furthermore, the target profile can
+be changed with the `cache-target` input, which defaults to `debug`.
 
 ```yaml
 - uses: moonrepo/setup-rust@v0
   with:
     cache: false
+    cache-target: release
 ```
 
 The following optimizations and considerations are taken into account when caching:
@@ -98,7 +100,7 @@ The following optimizations and considerations are taken into account when cachi
     `.cache`, and any other unnecessary files.
 - `/target`
   - Only the `/debug` profile is cached, as this profile is typically used for formatting, linting,
-    and testing.
+    and testing. This can be changed with the `cache-target` input.
   - The `/examples` and `/incremental` sub-directories are not cached as they are not necessary for
     CI.
   - All dep-info (`*.d`) files are removed, as they're meant for build systems and signaling

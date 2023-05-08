@@ -83,12 +83,16 @@ export async function installBins() {
 	await exec.exec('cargo', ['binstall', '--no-confirm', '--log-level', 'info', ...bins]);
 }
 
+export function getCacheTarget(): string {
+	return core.getInput('cache-target') || 'debug';
+}
+
 export function getCachePaths(): string[] {
 	return [
 		// ~/.cargo/registry
 		path.join(CARGO_HOME, 'registry'),
 		// /workspace/target/debug
-		path.join(WORKSPACE_ROOT, 'target/debug'),
+		path.join(WORKSPACE_ROOT, 'target', getCacheTarget()),
 	];
 }
 
@@ -111,6 +115,11 @@ export async function getPrimaryCacheKey() {
 
 	core.debug(`Hashing Cargo.lock = ${lockHash}`);
 	hasher.update(lockHash);
+
+	const cacheTarget = getCacheTarget();
+
+	core.debug(`Hashing target profile = ${cacheTarget}`);
+	hasher.update(cacheTarget);
 
 	const job = process.env.GITHUB_JOB;
 
@@ -148,11 +157,13 @@ export async function cleanCargoRegistry() {
 
 // https://doc.rust-lang.org/cargo/guide/build-cache.html
 export async function cleanTargetProfile() {
-	core.info('Cleaning target/debug before saving');
+	const targetProfile = getCacheTarget();
 
-	const targetDir = path.join(WORKSPACE_ROOT, 'target/debug');
+	core.info(`Cleaning target/${targetProfile} before saving`);
 
-	// target/debug/{examples,incremental} - Not required in CI
+	const targetDir = path.join(WORKSPACE_ROOT, 'target', targetProfile);
+
+	// target/*/{examples,incremental} - Not required in CI
 	core.info('Removing examples and incremental directories');
 
 	await Promise.all(
@@ -165,7 +176,7 @@ export async function cleanTargetProfile() {
 		}),
 	);
 
-	// target/debug/**/*.d - Not required in CI?
+	// target/**/*.d - Not required in CI?
 	core.info('Removing dep-info files (*.d)');
 
 	const globber = await glob.create(path.join(targetDir, '**/*.d'));

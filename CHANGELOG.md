@@ -2,6 +2,7 @@
 
 - Breaking: Cargo `bins` must provide the `cargo-` crate prefix manually. This change allows
   non-crate globals to be installed.
+- Added a `cache-target` input, to customize which target profile is cached. Defaults to `debug`.
 
 # 0.5.0
 

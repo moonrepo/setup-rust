@@ -7,8 +7,11 @@ inputs:
   bins:
     description: 'Comma-separated list of global binaries to install into Cargo.'
   cache:
-    description: 'Toggle caching of ~/.cargo/registry and /target/debug directories.'
+    description: 'Toggle caching of ~/.cargo/registry and /target/<cache-target> directories.'
     default: true
+  cache-target:
+    description: 'Name of the target profile to cache.'
+    default: 'debug'
   channel:
     description: 'Toolchain specification/channel to install.'
   components:
