@@ -15,6 +15,21 @@ jobs:
       - run: cargo test
 ```
 
+## Inputs
+
+The following inputs are available for the action, and can be passed via `with`. All inputs are
+optional.
+
+- `bins` - Comma-separated list of global binaries to install into Cargo.
+- `cache` - Toggle caching of directories. Defaults to `true`.
+- `cache-target` - Name of the target profile to cache. Defaults to `debug`.
+- `channel` - Toolchain specification/channel to explicitly install.
+- `components` - Comma-separated list of additional components to install.
+- `inherit-toolchain` - Inherit all toolchain settings from the `rust-toolchain.toml` file. Defaults
+  to `false`.
+- `targets` - Comma-separated list of additional targets to install.
+- `profile` - Profile to install. Defaults to `minimal`.
+
 ## Configuring the Rust toolchain
 
 This action will automatically install the appropriate toolchain with `rustup` by inspecting the
@@ -41,10 +56,11 @@ highest precedence.
     channel: '1.65.0'
 ```
 
-### Profile and components
+### Profile, components, and targets
 
-Furthermore, this action supports rustup profiles and components, which can be configured with the
-`profile` and `components` inputs respectively. When not defined, profile defaults to `minimal`.
+Furthermore, this action supports rustup profiles, components, and targets, which can be configured
+with the `profile`, `components`, and `targets` inputs respectively. When not defined, profile
+defaults to `minimal`.
 
 ```yaml
 - uses: moonrepo/setup-rust@v0
@@ -59,6 +75,14 @@ When using components, the input requires a comma separated list of component na
   with:
     components: clippy
 - run: cargo clippy --workspace
+```
+
+When using targets, the input requires a comma separated list of target triples.
+
+```yaml
+- uses: moonrepo/setup-rust@v0
+  with:
+    targets: 'x86_64-pc-windows-msvc,x86_64-pc-windows-gnu'
 ```
 
 ## Installing Cargo binaries
