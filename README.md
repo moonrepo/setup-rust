@@ -65,12 +65,12 @@ When using components, the input requires a comma separated list of component na
 
 If you require `cargo-make`, `cargo-nextest`, or other global binaries, this action supports
 installing Cargo binaries through the `bins` input, which requires a comma-separated list of crate
-names (`cargo-` prefix optional).
+names.
 
 ```yaml
 - uses: moonrepo/setup-rust@v0
   with:
-    bins: nextest, cargo-insta@1.28.0
+    bins: cargo-nextest, cargo-insta@1.28.0
 ```
 
 > Binaries are installed with [`cargo-binstall`](https://crates.io/crates/cargo-binstall) under the

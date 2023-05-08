@@ -62,8 +62,7 @@ export async function installBins() {
 		.getInput('bins')
 		.split(',')
 		.map((bin) => bin.trim())
-		.filter(Boolean)
-		.map((bin) => (bin.startsWith('cargo-') ? bin : `cargo-${bin}`));
+		.filter(Boolean);
 
 	if (CACHE_ENABLED) {
 		bins.push('cargo-cache');
