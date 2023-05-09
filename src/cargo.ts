@@ -14,7 +14,7 @@ export const CARGO_HOME = process.env.CARGO_HOME ?? path.join(os.homedir(), '.ca
 
 export const WORKSPACE_ROOT = process.env.GITHUB_WORKSPACE ?? process.cwd();
 
-export const CACHE_ENABLED = core.getBooleanInput('cache') || cache.isFeatureAvailable();
+export const CACHE_ENABLED = core.getBooleanInput('cache') && cache.isFeatureAvailable();
 
 export async function downloadAndInstallBinstall(binDir: string) {
 	core.info('cargo-binstall does not exist, attempting to install');
