@@ -26,6 +26,9 @@ export async function downloadAndInstallBinstall(binDir: string) {
 		case 'x64':
 			arch = 'x86_64';
 			break;
+		case 'arm':
+			arch = 'armv7';
+			break;
 		case 'arm64':
 			arch = 'aarch64';
 			break;
@@ -34,9 +37,21 @@ export async function downloadAndInstallBinstall(binDir: string) {
 	}
 
 	switch (process.platform) {
-		case 'linux':
-			file = `${arch}-unknown-linux-gnu.tgz`;
+		case 'linux': {
+			const { family } = await import('detect-libc');
+			let lib = 'gnu';
+
+			if ((await family()) === 'musl') {
+				lib = 'musl';
+			}
+
+			if (process.arch === 'arm') {
+				lib += 'eabihf';
+			}
+
+			file = `${arch}-unknown-linux-${lib}.tgz`;
 			break;
+		}
 		case 'darwin':
 			file = `${arch}-apple-darwin.zip`;
 			break;
@@ -220,7 +235,7 @@ export async function restoreCache() {
 		core.saveState('cache-hit-key', cacheKey);
 		core.info(`Cache restored using key ${primaryKey}`);
 	} else {
-		core.warning(`Cache does not exist using key ${primaryKey}`);
+		core.info(`Cache does not exist using key ${primaryKey}`);
 	}
 
 	core.setOutput('cache-key', cacheKey ?? primaryKey);

@@ -1,3 +1,7 @@
+# 1.0.0
+
+- Added musl support to `cargo-binstall`.
+
 # 0.6.0
 
 - Breaking: Cargo `bins` must provide the `cargo-` crate prefix manually. This change allows
