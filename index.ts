@@ -1,7 +1,38 @@
-import path from 'path';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import * as core from '@actions/core';
+import * as exec from '@actions/exec';
+import * as io from '@actions/io';
+import * as tc from '@actions/tool-cache';
 import { CARGO_HOME, installBins, restoreCache } from './src/cargo';
 import { installToolchain } from './src/rust';
+
+export async function installRustup() {
+	try {
+		await io.which('rustup', true);
+		return;
+	} catch {
+		// Doesn't exist
+	}
+
+	core.info('rustup does not exist, attempting to install');
+
+	const scriptPath = path.join(os.tmpdir(), 'rustup-init');
+	const script = await tc.downloadTool(
+		process.platform === 'win32' ? 'https://win.rustup.rs' : 'https://sh.rustup.rs',
+		scriptPath,
+	);
+
+	core.info(`Downloaded installation script to ${script}`);
+
+	// eslint-disable-next-line no-magic-numbers
+	await fs.promises.chmod(script, 0o755);
+
+	await exec.exec(script, ['--default-toolchain', 'none', '-y']);
+
+	core.info('Installed rustup');
+}
 
 async function run() {
 	core.info('Setting cargo environment variables');
@@ -14,6 +45,7 @@ async function run() {
 	core.addPath(path.join(CARGO_HOME, 'bin'));
 
 	try {
+		await installRustup();
 		await installToolchain();
 		await installBins();
 

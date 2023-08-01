@@ -147,11 +147,6 @@ Outside of being evergreen, this action also supports the following features:
 - Assumes `rustup`, `cargo`, and other commands are available globally. This allows you to use them
   directly in a `run` command, without having to use `actions-rs/cargo`.
 
-However, this action _does not_:
-
-- Install `rustup` if it does not exist, while `actions-rs` will. This is typically fine if using
-  GitHub provided runners as all Rust tooling comes pre-installed.
-
 ### `dtolnay/rust-toolchain`
 
 Our action is very similar to theirs, which was a great implementation reference, but our action

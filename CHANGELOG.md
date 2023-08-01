@@ -1,5 +1,6 @@
 # 1.0.0
 
+- Will now install `rustup` if it does not exist in the environment.
 - Added musl support to `cargo-binstall`.
 
 # 0.6.0
