@@ -95,10 +95,12 @@ names.
 - uses: moonrepo/setup-rust@v1
   with:
     bins: cargo-nextest, cargo-insta@1.28.0
+  env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 > Binaries are installed with [`cargo-binstall`](https://crates.io/crates/cargo-binstall) under the
-> hood.
+> hood. We suggest setting `GITHUB_TOKEN` to avoid rate limiting.
 
 ## Caching in CI
 

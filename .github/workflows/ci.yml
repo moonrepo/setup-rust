@@ -28,3 +28,5 @@ jobs:
       - run: pnpm install
       - run: pnpm run build
       - uses: ./ # self
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
