@@ -14,3 +14,13 @@ jobs:
       - run: npm install -g pnpm
       - run: pnpm install
       - run: pnpm run check
+  action:
+    name: 'Action'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+      - run: npm install -g pnpm
+      - run: pnpm install
+      - run: pnpm run build
+      - run: node dist/index.js
