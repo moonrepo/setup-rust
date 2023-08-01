@@ -18,10 +18,9 @@ export async function installRustup() {
 
 	core.info('rustup does not exist, attempting to install');
 
-	const scriptPath = path.join(os.tmpdir(), 'rustup-init');
 	const script = await tc.downloadTool(
 		process.platform === 'win32' ? 'https://win.rustup.rs' : 'https://sh.rustup.rs',
-		scriptPath,
+		path.join(os.tmpdir(), 'rustup-init'),
 	);
 
 	core.info(`Downloaded installation script to ${script}`);
