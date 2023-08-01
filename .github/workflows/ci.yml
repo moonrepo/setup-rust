@@ -14,3 +14,19 @@ jobs:
       - run: npm install -g pnpm
       - run: pnpm install
       - run: pnpm run check
+  action:
+    name: 'Action'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+      - run: npm install -g pnpm
+      - run: pnpm install
+      - run: pnpm run build
+      - uses: ./ # self
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

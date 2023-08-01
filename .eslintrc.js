@@ -7,4 +7,7 @@ module.exports = {
 		project: 'tsconfig.json',
 		tsconfigRootDir: __dirname,
 	},
+	rules: {
+		'unicorn/prefer-top-level-await': 'off',
+	},
 };

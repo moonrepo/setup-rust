@@ -1,7 +1,7 @@
 /* eslint-disable import/no-mutable-exports */
 
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import TOML from '@ltd/j-toml';

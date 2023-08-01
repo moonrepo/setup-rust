@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # ...
-      - uses: moonrepo/setup-rust@v0
+      - uses: moonrepo/setup-rust@v1
       - run: cargo test
 ```
 
@@ -51,7 +51,7 @@ The toolchain/channel can also be explicitly configured with the `channel` input
 highest precedence.
 
 ```yaml
-- uses: moonrepo/setup-rust@v0
+- uses: moonrepo/setup-rust@v1
   with:
     channel: '1.65.0'
 ```
@@ -63,7 +63,7 @@ with the `profile`, `components`, and `targets` inputs respectively. When not de
 defaults to `minimal`.
 
 ```yaml
-- uses: moonrepo/setup-rust@v0
+- uses: moonrepo/setup-rust@v1
   with:
     profile: complete
 ```
@@ -71,7 +71,7 @@ defaults to `minimal`.
 When using components, the input requires a comma separated list of component names.
 
 ```yaml
-- uses: moonrepo/setup-rust@v0
+- uses: moonrepo/setup-rust@v1
   with:
     components: clippy
 - run: cargo clippy --workspace
@@ -80,7 +80,7 @@ When using components, the input requires a comma separated list of component na
 When using targets, the input requires a comma separated list of target triples.
 
 ```yaml
-- uses: moonrepo/setup-rust@v0
+- uses: moonrepo/setup-rust@v1
   with:
     targets: 'x86_64-pc-windows-msvc,x86_64-pc-windows-gnu'
 ```
@@ -92,13 +92,15 @@ installing Cargo binaries through the `bins` input, which requires a comma-separ
 names.
 
 ```yaml
-- uses: moonrepo/setup-rust@v0
+- uses: moonrepo/setup-rust@v1
   with:
     bins: cargo-nextest, cargo-insta@1.28.0
+  env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 > Binaries are installed with [`cargo-binstall`](https://crates.io/crates/cargo-binstall) under the
-> hood.
+> hood. We suggest setting `GITHUB_TOKEN` to avoid rate limiting.
 
 ## Caching in CI
 
@@ -107,7 +109,7 @@ CI times. To disable caching, set the `cache` input to `false`. Furthermore, the
 be changed with the `cache-target` input, which defaults to `debug`.
 
 ```yaml
-- uses: moonrepo/setup-rust@v0
+- uses: moonrepo/setup-rust@v1
   with:
     cache: false
     cache-target: release
@@ -146,11 +148,6 @@ Outside of being evergreen, this action also supports the following features:
 - Installs Cargo bins.
 - Assumes `rustup`, `cargo`, and other commands are available globally. This allows you to use them
   directly in a `run` command, without having to use `actions-rs/cargo`.
-
-However, this action _does not_:
-
-- Install `rustup` if it does not exist, while `actions-rs` will. This is typically fine if using
-  GitHub provided runners as all Rust tooling comes pre-installed.
 
 ### `dtolnay/rust-toolchain`
 
