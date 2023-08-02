@@ -1,3 +1,7 @@
+# 1.0.1
+
+- Fixed an issue where a module was missing from the build.
+
 # 1.0.0
 
 - Will now install `rustup` if it does not exist in the environment.

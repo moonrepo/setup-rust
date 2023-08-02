@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { family } from 'detect-libc';
 import * as cache from '@actions/cache';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
@@ -38,7 +39,6 @@ export async function downloadAndInstallBinstall(binDir: string) {
 
 	switch (process.platform) {
 		case 'linux': {
-			const { family } = await import('detect-libc');
 			let lib = 'gnu';
 
 			if ((await family()) === 'musl') {
