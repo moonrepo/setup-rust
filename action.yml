@@ -33,7 +33,7 @@ outputs:
   rust-hash:
     description: 'Commit hash of the installed rustc.'
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'dist/index.js'
   post: 'dist/post/index.js'
 branding:
