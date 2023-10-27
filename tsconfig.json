@@ -2,7 +2,7 @@
   "extends": "tsconfig-moon/tsconfig.json",
   "compilerOptions": {
     "allowJs": true,
-    "module": "Node16",
+    "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "noEmit": true,
     "verbatimModuleSyntax": false
