@@ -136,6 +136,13 @@ export async function getPrimaryCacheKey() {
 	core.debug(`Hashing target profile = ${cacheTarget}`);
 	hasher.update(cacheTarget);
 
+	const workflow = process.env.GITHUB_WORKFLOW;
+
+	if (workflow) {
+		core.debug(`Hashing GITHUB_WORKFLOW = ${workflow}`);
+		hasher.update(workflow);
+	}
+
 	const job = process.env.GITHUB_JOB;
 
 	if (job) {
