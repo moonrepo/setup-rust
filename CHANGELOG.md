@@ -1,3 +1,12 @@
+# 1.0.3
+
+- Include `GITHUB_WORKFLOW` in cache key.
+- Updated dependencies.
+
+# 1.0.2
+
+- Switch to Node.js v20.
+
 # 1.0.1
 
 - Fixed an issue where a module was missing from the build.
