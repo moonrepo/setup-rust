@@ -11,8 +11,7 @@ inputs:
     default: true
   cache-base:
     description:
-      'Base branch or ref to save a warmup cache. Other branches and refs will restore from this
-      base.'
+      'Base branch/ref to save a warmup cache on. Other branches/refs will restore from this base.'
   cache-target:
     description: 'Name of the target profile to cache.'
     default: 'debug'

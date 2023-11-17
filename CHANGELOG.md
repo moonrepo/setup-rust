@@ -1,5 +1,7 @@
 # 1.1.0
 
+- Added a `cache-base` input. When provided, will only save cache on this branch/ref, but will
+  restore cache on all branches/refs.
 - Updated dependencies.
 
 # 1.0.3

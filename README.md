@@ -22,6 +22,8 @@ optional.
 
 - `bins` - Comma-separated list of global binaries to install into Cargo.
 - `cache` - Toggle caching of directories. Defaults to `true`.
+- `cache-base` - Base branch/ref to save a warmup cache on. Other branches/refs will restore from
+  this base.
 - `cache-target` - Name of the target profile to cache. Defaults to `debug`.
 - `channel` - Toolchain specification/channel to explicitly install.
 - `components` - Comma-separated list of additional components to install.
@@ -134,6 +136,23 @@ The following optimizations and considerations are taken into account when cachi
 
 > The following sources are hashed for the generated cache key: `$GITHUB_JOB`, `Cargo.lock`, Rust
 > version, Rust commit hash, and OS.
+
+### Warmup strategy
+
+Another strategy that we support is called a warmup cache, where a base branch/ref is used to
+generate and save the cache (like master), and all other branches/refs will _only_ restore this
+cache (and not save).
+
+This can be enabled with the `cache-base` input, which requires a branch/ref name. This input also
+supports regex.
+
+```yaml
+- uses: moonrepo/setup-rust@v1
+  with:
+    cache-base: master
+    # With regex
+    cache-base: (master|main|develop)
+```
 
 ## Compared to
 

@@ -49,6 +49,7 @@ export async function getPrimaryCacheKey() {
 
 	if (core.getInput('cache-base')) {
 		core.debug('Using warmup strategy, not hashing Cargo.lock, GITHUB_WORKFLOW, or GITHUB_JOB');
+		hasher.update('warmup');
 	}
 
 	// When warming up, these add far too much granularity to the cache key
