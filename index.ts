@@ -5,7 +5,8 @@ import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as io from '@actions/io';
 import * as tc from '@actions/tool-cache';
-import { CARGO_HOME, installBins, restoreCache } from './src/cargo';
+import { CARGO_HOME } from './src/cache';
+import { installBins, restoreCache } from './src/cargo';
 import { installToolchain } from './src/rust';
 
 export async function installRustup() {

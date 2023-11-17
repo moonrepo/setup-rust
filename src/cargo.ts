@@ -1,6 +1,4 @@
-import crypto from 'node:crypto';
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
 import { family } from 'detect-libc';
 import * as cache from '@actions/cache';
@@ -8,14 +6,16 @@ import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as glob from '@actions/glob';
 import * as tc from '@actions/tool-cache';
+import {
+	CARGO_HOME,
+	getCachePaths,
+	getCachePrefixes,
+	getCacheTarget,
+	getPrimaryCacheKey,
+	isCacheEnabled,
+	WORKSPACE_ROOT,
+} from './cache';
 import { rmrf } from './fs';
-import { RUST_HASH, RUST_VERSION } from './rust';
-
-export const CARGO_HOME = process.env.CARGO_HOME ?? path.join(os.homedir(), '.cargo');
-
-export const WORKSPACE_ROOT = process.env.GITHUB_WORKSPACE ?? process.cwd();
-
-export const CACHE_ENABLED = core.getBooleanInput('cache') && cache.isFeatureAvailable();
 
 export async function downloadAndInstallBinstall(binDir: string) {
 	core.info('cargo-binstall does not exist, attempting to install');
@@ -79,7 +79,7 @@ export async function installBins() {
 		.map((bin) => bin.trim())
 		.filter(Boolean);
 
-	if (CACHE_ENABLED) {
+	if (isCacheEnabled()) {
 		bins.push('cargo-cache');
 	}
 
@@ -96,61 +96,6 @@ export async function installBins() {
 	}
 
 	await exec.exec('cargo', ['binstall', '--no-confirm', '--log-level', 'info', ...bins]);
-}
-
-export function getCacheTarget(): string {
-	return core.getInput('cache-target') || 'debug';
-}
-
-export function getCachePaths(): string[] {
-	return [
-		// ~/.cargo/registry
-		path.join(CARGO_HOME, 'registry'),
-		// /workspace/target/debug
-		path.join(WORKSPACE_ROOT, 'target', getCacheTarget()),
-	];
-}
-
-export function getCachePrefixes(): string[] {
-	return [`setup-rustcargo-v1-${process.platform}`, 'setup-rustcargo-v1'];
-}
-
-export async function getPrimaryCacheKey() {
-	const hasher = crypto.createHash('sha1');
-
-	core.info('Generating cache key');
-
-	core.debug(`Hashing Rust version = ${RUST_VERSION}`);
-	hasher.update(RUST_VERSION);
-
-	core.debug(`Hashing Rust commit hash = ${RUST_HASH}`);
-	hasher.update(RUST_HASH);
-
-	const lockHash = await glob.hashFiles('Cargo.lock');
-
-	core.debug(`Hashing Cargo.lock = ${lockHash}`);
-	hasher.update(lockHash);
-
-	const cacheTarget = getCacheTarget();
-
-	core.debug(`Hashing target profile = ${cacheTarget}`);
-	hasher.update(cacheTarget);
-
-	const workflow = process.env.GITHUB_WORKFLOW;
-
-	if (workflow) {
-		core.debug(`Hashing GITHUB_WORKFLOW = ${workflow}`);
-		hasher.update(workflow);
-	}
-
-	const job = process.env.GITHUB_JOB;
-
-	if (job) {
-		core.debug(`Hashing GITHUB_JOB = ${job}`);
-		hasher.update(job);
-	}
-
-	return `${getCachePrefixes()[0]}-${hasher.digest('hex')}`;
 }
 
 export async function cleanCargoRegistry() {
@@ -208,7 +153,7 @@ export async function cleanTargetProfile() {
 }
 
 export async function saveCache() {
-	if (!CACHE_ENABLED) {
+	if (!isCacheEnabled()) {
 		return;
 	}
 
@@ -229,7 +174,7 @@ export async function saveCache() {
 }
 
 export async function restoreCache() {
-	if (!CACHE_ENABLED) {
+	if (!isCacheEnabled()) {
 		return;
 	}
 
