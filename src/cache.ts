@@ -14,10 +14,6 @@ export function isCacheEnabled(): boolean {
 	return core.getBooleanInput('cache') && cache.isFeatureAvailable();
 }
 
-export function isUsingBaseWarmupStrategy(): boolean {
-	return false;
-}
-
 export function getCacheTarget(): string {
 	return core.getInput('cache-target') || 'debug';
 }
@@ -46,28 +42,35 @@ export async function getPrimaryCacheKey() {
 	core.debug(`Hashing Rust commit hash = ${RUST_HASH}`);
 	hasher.update(RUST_HASH);
 
-	const lockHash = await glob.hashFiles('Cargo.lock');
-
-	core.debug(`Hashing Cargo.lock = ${lockHash}`);
-	hasher.update(lockHash);
-
 	const cacheTarget = getCacheTarget();
 
 	core.debug(`Hashing target profile = ${cacheTarget}`);
 	hasher.update(cacheTarget);
 
-	const workflow = process.env.GITHUB_WORKFLOW;
-
-	if (workflow) {
-		core.debug(`Hashing GITHUB_WORKFLOW = ${workflow}`);
-		hasher.update(workflow);
+	if (core.getInput('cache-base')) {
+		core.debug('Using warmup strategy, not hashing Cargo.lock, GITHUB_WORKFLOW, or GITHUB_JOB');
 	}
 
-	const job = process.env.GITHUB_JOB;
+	// When warming up, these add far too much granularity to the cache key
+	else {
+		const lockHash = await glob.hashFiles('Cargo.lock');
 
-	if (job) {
-		core.debug(`Hashing GITHUB_JOB = ${job}`);
-		hasher.update(job);
+		core.debug(`Hashing Cargo.lock = ${lockHash}`);
+		hasher.update(lockHash);
+
+		const workflow = process.env.GITHUB_WORKFLOW;
+
+		if (workflow) {
+			core.debug(`Hashing GITHUB_WORKFLOW = ${workflow}`);
+			hasher.update(workflow);
+		}
+
+		const job = process.env.GITHUB_JOB;
+
+		if (job) {
+			core.debug(`Hashing GITHUB_JOB = ${job}`);
+			hasher.update(job);
+		}
 	}
 
 	return `${getCachePrefixes()[0]}-${hasher.digest('hex')}`;
