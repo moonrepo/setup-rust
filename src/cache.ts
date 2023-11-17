@@ -47,12 +47,26 @@ export async function getPrimaryCacheKey() {
 	core.debug(`Hashing target profile = ${cacheTarget}`);
 	hasher.update(cacheTarget);
 
+	// When warming up, loosen the cache key to allow for more cache hits
 	if (core.getInput('cache-base')) {
 		core.debug('Using warmup strategy, not hashing Cargo.lock, GITHUB_WORKFLOW, or GITHUB_JOB');
 		hasher.update('warmup');
+
+		const baseRef = process.env.GITHUB_BASE_REF ?? '';
+
+		if (
+			baseRef === 'master' ||
+			baseRef === 'main' ||
+			baseRef === 'trunk' ||
+			baseRef.startsWith('develop') ||
+			baseRef.startsWith('release')
+		) {
+			core.debug(`Hashing GITHUB_BASE_REF = ${baseRef}`);
+			hasher.update(baseRef);
+		}
 	}
 
-	// When warming up, these add far too much granularity to the cache key
+	// Otherwise, these add far too much granularity to the cache key
 	else {
 		const lockHash = await glob.hashFiles('Cargo.lock');
 
