@@ -9,6 +9,8 @@ inputs:
   cache:
     description: 'Toggle caching of ~/.cargo/registry and /target/<cache-target> directories.'
     default: true
+  cache-base:
+    description: 'Base branch or ref to save cache. Other branches and refs will restore from this base.'
   cache-target:
     description: 'Name of the target profile to cache.'
     default: 'debug'

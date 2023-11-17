@@ -1,3 +1,7 @@
+# 1.1.0
+
+- Updated dependencies.
+
 # 1.0.3
 
 - Include `GITHUB_WORKFLOW` in cache key.
