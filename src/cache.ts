@@ -22,7 +22,10 @@ export function getTargetPaths(): string[] {
 	const profile = getCacheTarget();
 	const dirs = core.getInput('target-dirs', { required: true }).split(',');
 
-	return dirs.filter((dir) => dir.trim()).map((dir) => path.join(WORKSPACE_ROOT, dir, profile));
+	return dirs
+		.map((dir) => dir.trim())
+		.filter(Boolean)
+		.map((dir) => path.join(WORKSPACE_ROOT, dir, profile));
 }
 
 export function getCachePaths(): string[] {

@@ -179,6 +179,13 @@ export async function saveCache() {
 
 	core.info(`Saving cache with key ${primaryKey}`);
 
+	core.debug(`Cache key: ${primaryKey}`);
+	core.debug('Cache paths:');
+
+	for (const cachePath of cachePaths) {
+		core.debug(`- ${cachePath}`);
+	}
+
 	await cache.saveCache(cachePaths, primaryKey);
 }
 
@@ -190,6 +197,15 @@ export async function restoreCache() {
 	core.info('Attempting to restore cache');
 
 	const primaryKey = await getPrimaryCacheKey();
+	const cachePaths = getCachePaths();
+
+	core.debug(`Cache key: ${primaryKey}`);
+	core.debug('Cache paths:');
+
+	for (const cachePath of cachePaths) {
+		core.debug(`- ${cachePath}`);
+	}
+
 	const cacheKey = await cache.restoreCache(getCachePaths(), primaryKey, getCachePrefixes());
 
 	if (cacheKey) {

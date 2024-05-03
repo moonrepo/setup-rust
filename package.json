@@ -1,6 +1,6 @@
 {
   "name": "@moonrepo/setup-rust",
-  "version": "1.0.3",
+  "version": "1.2.0",
   "description": "A GitHub action for setting up Rust and Cargo.",
   "main": "dist/index.js",
   "scripts": {
