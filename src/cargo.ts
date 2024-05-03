@@ -174,6 +174,11 @@ export async function saveCache() {
 		return true;
 	});
 
+	if (cachePaths.length === 0) {
+		core.info('No paths to cache, skipping save entirely');
+		return;
+	}
+
 	await cleanCargoRegistry();
 	await cleanTargetProfile();
 
