@@ -1,3 +1,10 @@
+# 1.2.0
+
+- Added a `target-dirs` input, allowing the target folders to be specified. Can now cache multiple
+  target folders.
+- Updated to skip caching a directory if it does not exist, instead of failing.
+- Updated dependencies.
+
 # 1.1.0
 
 - Added a `cache-base` input. When provided, will only save cache on this branch/ref, but will

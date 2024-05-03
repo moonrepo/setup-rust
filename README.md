@@ -30,6 +30,8 @@ optional.
 - `inherit-toolchain` - Inherit all toolchain settings from the `rust-toolchain.toml` file. Defaults
   to `false`.
 - `targets` - Comma-separated list of additional targets to install.
+- `target-dirs` - Comma-separated list of target folder paths, relative from the repository root.
+  Defaults to `target`.
 - `profile` - Profile to install. Defaults to `minimal`.
 
 ## Configuring the Rust toolchain

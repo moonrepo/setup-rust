@@ -165,12 +165,33 @@ export async function saveCache() {
 		return;
 	}
 
+	const cachePaths = getCachePaths().filter((cachePath) => {
+		if (!fs.existsSync(cachePath)) {
+			core.info(`Cache path ${cachePath} does not exist, skipping`);
+			return false;
+		}
+
+		return true;
+	});
+
+	if (cachePaths.length === 0) {
+		core.info('No paths to cache, skipping save entirely');
+		return;
+	}
+
 	await cleanCargoRegistry();
 	await cleanTargetProfile();
 
 	core.info(`Saving cache with key ${primaryKey}`);
 
-	await cache.saveCache(getCachePaths(), primaryKey);
+	core.debug(`Cache key: ${primaryKey}`);
+	core.debug('Cache paths:');
+
+	for (const cachePath of cachePaths) {
+		core.debug(`- ${cachePath}`);
+	}
+
+	await cache.saveCache(cachePaths, primaryKey);
 }
 
 export async function restoreCache() {
@@ -181,6 +202,15 @@ export async function restoreCache() {
 	core.info('Attempting to restore cache');
 
 	const primaryKey = await getPrimaryCacheKey();
+	const cachePaths = getCachePaths();
+
+	core.debug(`Cache key: ${primaryKey}`);
+	core.debug('Cache paths:');
+
+	for (const cachePath of cachePaths) {
+		core.debug(`- ${cachePath}`);
+	}
+
 	const cacheKey = await cache.restoreCache(getCachePaths(), primaryKey, getCachePrefixes());
 
 	if (cacheKey) {
