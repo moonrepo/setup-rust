@@ -1,3 +1,7 @@
+# 1.2.0
+
+- Updated to not save the cache if one of the required paths does not exist.
+
 # 1.1.0
 
 - Added a `cache-base` input. When provided, will only save cache on this branch/ref, but will

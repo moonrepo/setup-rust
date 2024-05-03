@@ -165,12 +165,21 @@ export async function saveCache() {
 		return;
 	}
 
+	const cachePaths = getCachePaths();
+
+	for (const cachePath of cachePaths) {
+		if (!fs.existsSync(cachePath)) {
+			core.info(`Cache path ${cachePath} does not exist, skipping save`);
+			return;
+		}
+	}
+
 	await cleanCargoRegistry();
 	await cleanTargetProfile();
 
 	core.info(`Saving cache with key ${primaryKey}`);
 
-	await cache.saveCache(getCachePaths(), primaryKey);
+	await cache.saveCache(cachePaths, primaryKey);
 }
 
 export async function restoreCache() {

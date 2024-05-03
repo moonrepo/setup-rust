@@ -8,7 +8,7 @@ inputs:
     description: 'Comma-separated list of global binaries to install into Cargo.'
   cache:
     description: 'Toggle caching of ~/.cargo/registry and /target/<cache-target> directories.'
-    default: true
+    default: 'true'
   cache-base:
     description:
       'Base branch/ref to save a warmup cache on. Other branches/refs will restore from this base.'
@@ -21,7 +21,7 @@ inputs:
     description: 'Comma-separated list of additional components to install.'
   inherit-toolchain:
     description: 'Inherit all toolchain settings from the rust-toolchain.toml file.'
-    default: false
+    default: 'false'
   targets:
     description: 'Comma-separated list of additional targets to install.'
   profile:
