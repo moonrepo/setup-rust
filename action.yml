@@ -24,6 +24,9 @@ inputs:
     default: 'false'
   targets:
     description: 'Comma-separated list of additional targets to install.'
+  target-dirs:
+    description: 'Comma-separated list of target folder paths, relative from the repository root.'
+    default: 'target'
   profile:
     description: 'Profile to install. Defaults to "minimal".'
 outputs:

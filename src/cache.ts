@@ -18,12 +18,19 @@ export function getCacheTarget(): string {
 	return core.getInput('cache-target') || 'debug';
 }
 
+export function getTargetPaths(): string[] {
+	const profile = getCacheTarget();
+	const dirs = core.getInput('target-dirs', { required: true }).split(',');
+
+	return dirs.filter((dir) => dir.trim()).map((dir) => path.join(WORKSPACE_ROOT, dir, profile));
+}
+
 export function getCachePaths(): string[] {
 	return [
 		// ~/.cargo/registry
 		path.join(CARGO_HOME, 'registry'),
 		// /workspace/target/debug
-		path.join(WORKSPACE_ROOT, 'target', getCacheTarget()),
+		...getTargetPaths(),
 	];
 }
 

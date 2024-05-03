@@ -1,6 +1,9 @@
 # 1.2.0
 
-- Updated to not save the cache if one of the required paths does not exist.
+- Added a `target-dirs` input, allowing the target folders to be specified. Can now cache multiple
+  target folders.
+- Updated to skip caching a directory if it does not exist, instead of failing.
+- Updated dependencies.
 
 # 1.1.0
 

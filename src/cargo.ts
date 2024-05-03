@@ -165,14 +165,14 @@ export async function saveCache() {
 		return;
 	}
 
-	const cachePaths = getCachePaths();
-
-	for (const cachePath of cachePaths) {
+	const cachePaths = getCachePaths().filter((cachePath) => {
 		if (!fs.existsSync(cachePath)) {
-			core.info(`Cache path ${cachePath} does not exist, skipping save`);
-			return;
+			core.info(`Cache path ${cachePath} does not exist, skipping`);
+			return false;
 		}
-	}
+
+		return true;
+	});
 
 	await cleanCargoRegistry();
 	await cleanTargetProfile();
