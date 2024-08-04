@@ -17,6 +17,7 @@ import {
 } from './cache';
 import { rmrf } from './fs';
 
+// eslint-disable-next-line complexity
 export async function downloadAndInstallBinstall(binDir: string) {
 	core.info('cargo-binstall does not exist, attempting to install');
 
@@ -62,7 +63,11 @@ export async function downloadAndInstallBinstall(binDir: string) {
 			throw new Error(`Unsupported platform: ${process.platform}`);
 	}
 
-	const url = `https://github.com/cargo-bins/cargo-binstall/releases/latest/download/cargo-binstall-${file}`;
+	// https://github.com/cargo-bins/cargo-binstall/issues/1864
+	const version = process.env.CARGO_BINSTALL_VERSION ?? 'v1.8.0';
+	const url = version === 'latest'
+		? `https://github.com/cargo-bins/cargo-binstall/releases/latest/download/cargo-binstall-${file}`
+		: `https://github.com/cargo-bins/cargo-binstall/releases/download/${version}/cargo-binstall-${file}`;
 	const dlPath = await tc.downloadTool(url);
 
 	if (url.endsWith('.zip')) {
