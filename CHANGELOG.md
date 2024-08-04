@@ -1,3 +1,8 @@
+# 1.2.1
+
+- Pinned the `cargo-binstall` version to v1.8 to work around the 404 errors in CI.
+- Added support for the `CARGO_BINSTALL_VERSION` environment variable.
+
 # 1.2.0
 
 - Added a `target-dirs` input, allowing the target folders to be specified. Can now cache multiple
