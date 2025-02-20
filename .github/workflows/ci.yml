@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
       - run: npm install -g pnpm
       - run: pnpm install
       - run: pnpm run check
@@ -23,7 +23,7 @@ jobs:
       fail-fast: false
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
       - run: npm install -g pnpm
       - run: pnpm install
       - run: pnpm run build
@@ -39,7 +39,7 @@ jobs:
       fail-fast: false
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
       - run: npm install -g pnpm
       - run: pnpm install
       - run: pnpm run build

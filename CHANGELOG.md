@@ -1,3 +1,7 @@
+# 1.2.2
+
+- Updated dependencies.
+
 # 1.2.1
 
 - Pinned the `cargo-binstall` version to v1.8 to work around the 404 errors in CI.
