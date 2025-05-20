@@ -195,3 +195,13 @@ Here are the key differences between the two:
 - Theirs supports a handful of inputs for controlling the cache key, while ours does not.
 - Theirs is a bit more smart in what it caches, while ours is a bit more brute force. We simply
   cache specific directories as-is after cleaning.
+
+### `taiki-e/install-action`
+
+Their action is versatile for installing a wide range of development tools, including Rust binaries, primarily from GitHub Releases. While our action focuses on a comprehensive Rust environment setup (toolchain, caching, and binaries), their action is specialized in tool installation.
+
+Here are some key differences:
+
+- Our action is an all-in-one solution for Rust CI (toolchain, caching, binaries via `bins` input); theirs focuses on general tool installation and does not handle Rust toolchain setup or caching.
+- Both actions install Rust binaries: ours uses `cargo-binstall` directly for the `bins` input, while theirs uses `cargo-binstall` as a fallback for tools not in its manifests.
+- Theirs offers fine-grained version control for a wide array of tools; our action supports versioning for binaries installed via the `bins` input (e.g., `cargo-insta@1.28.0`).
