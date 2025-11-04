@@ -15,6 +15,8 @@ inputs:
   cache-target:
     description: 'Name of the target profile to cache.'
     default: 'debug'
+  cache-extra-identifier:
+    description: 'Additional identifier to include in cache key for matrix jobs or custom cache separation.'
   channel:
     description: 'Toolchain specification/channel to explicitly install.'
   components:

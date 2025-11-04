@@ -25,6 +25,7 @@ optional.
 - `cache-base` - Base branch/ref to save a warmup cache on. Other branches/refs will restore from
   this base.
 - `cache-target` - Name of the target profile to cache. Defaults to `debug`.
+- `cache-extra-identifier` - Additional identifier to include in cache key for matrix jobs or custom cache separation.
 - `channel` - Toolchain specification/channel to explicitly install.
 - `components` - Comma-separated list of additional components to install.
 - `inherit-toolchain` - Inherit all toolchain settings from the `rust-toolchain.toml` file. Defaults
@@ -117,6 +118,19 @@ be changed with the `cache-target` input, which defaults to `debug`.
   with:
     cache: false
     cache-target: release
+```
+
+For matrix jobs where the cache key would otherwise be identical, you can use `cache-extra-identifier` to ensure unique cache keys:
+
+```yaml
+strategy:
+  matrix:
+    os: [ubuntu-latest, windows-latest, macos-latest]
+    rust: [stable, beta]
+steps:
+  - uses: moonrepo/setup-rust@v1
+    with:
+      cache-extra-identifier: ${{ matrix.os }}-${{ matrix.rust }}
 ```
 
 The following optimizations and considerations are taken into account when caching:
