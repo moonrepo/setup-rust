@@ -1,3 +1,8 @@
+# 1.3.0
+
+- Updated action to Node.js v24.
+- Updated dependencies.
+
 # 1.2.2
 
 - Updated dependencies.
