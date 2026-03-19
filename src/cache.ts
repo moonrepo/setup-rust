@@ -96,6 +96,13 @@ export async function getPrimaryCacheKey() {
 			core.debug(`Hashing GITHUB_JOB = ${job}`);
 			hasher.update(job);
 		}
+
+		const extraIdentifier = core.getInput('cache-extra-identifier');
+
+		if (extraIdentifier) {
+			core.debug(`Hashing cache-extra-identifier = ${extraIdentifier}`);
+			hasher.update(extraIdentifier);
+		}
 	}
 
 	return `${getCachePrefixes()[0]}-${hasher.digest('hex')}`;
