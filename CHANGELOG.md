@@ -1,5 +1,6 @@
 # 1.3.0
 
+- Added a `cache-extra-identifier` input.
 - Updated action to Node.js v24.
 - Updated dependencies.
 
