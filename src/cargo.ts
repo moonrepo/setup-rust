@@ -195,8 +195,19 @@ export async function saveCache() {
 	for (const cachePath of cachePaths) {
 		core.debug(`- ${cachePath}`);
 	}
-
-	await cache.saveCache(cachePaths, primaryKey);
+    for (let i = 1; i <= 10; i++) {
+        try {
+            return await cache.saveCache(cachePaths, primaryKey);
+        }
+        catch(error) {
+            const errStr = `${error}`
+            if (errStr.includes("Cache service responded with 429 during upload chunk")) {
+                core.info('Failed to upload cache, got rate limit error, waiting 30 seconds.');
+                await new Promise(f => setTimeout(f, 30000));
+            }
+        }
+    }
+    throw Error("Failed to upload cache.")
 }
 
 export async function restoreCache() {
